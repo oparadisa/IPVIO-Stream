@@ -62,6 +62,7 @@ fun SearchScreen(
     tab: Int, state: LazyListState,
     onOpen: (Item) -> Unit, onBrowse: (BrowseReq) -> Unit, onTab: (Int) -> Unit
 ) {
+    if (com.ipvio.stream.mobile.MobileUi.active) { com.ipvio.stream.mobile.MobileSearch(onOpen, onBrowse, onTab); return }   // phones/tablets (fork)
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val all = PlaylistStore.channels

@@ -43,6 +43,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,6 +78,25 @@ import com.ipvio.stream.mobile.MobileLogic.SizeClass
  */
 object MobileUi {
     var active by mutableStateOf(false)
+}
+
+/** The device density without the TV scaling; set by [MobileFrame], null on the TV. */
+val LocalNativeDensity = staticCompositionLocalOf<Density?> { null }
+
+/** Phone/tablet screens are laid out in device dp and follow the system font size (not the TV design scale). */
+@Composable
+fun NativeDensity(content: @Composable () -> Unit) {
+    val tv = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides (LocalNativeDensity.current ?: tv), LocalTvDensity provides tv, content = content)
+}
+
+/** The app's (TV-scaled) density, for reused TV parts inside a phone screen whose inner sizes are designed for it. */
+private val LocalTvDensity = staticCompositionLocalOf<Density?> { null }
+
+/** Lays out [content] with the TV density again (the size it gets from outside stays the same). */
+@Composable
+fun TvDensity(content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalDensity provides (LocalTvDensity.current ?: LocalDensity.current), content = content)
 }
 
 /** Navigation of the main screen, published by AppContent (which owns the tab state) and drawn by [MobileFrame]. */
@@ -138,7 +158,7 @@ fun MobileFrame(native: Density, content: @Composable () -> Unit) {
         bottom = safe.calculateBottomPadding() + if (showBar) native(native.itemH()) else 0.dp
     )
     Box(Modifier.fillMaxSize().background(Bg)) {
-        Box(Modifier.fillMaxSize().padding(pad)) { content() }
+        Box(Modifier.fillMaxSize().padding(pad)) { CompositionLocalProvider(LocalNativeDensity provides native) { content() } }
         CompositionLocalProvider(LocalDensity provides native) {
             if (showBar) BottomBar(Modifier.align(Alignment.BottomCenter))
             if (nav && rail) Rail(Modifier.align(Alignment.CenterStart))

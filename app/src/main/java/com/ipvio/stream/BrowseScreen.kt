@@ -86,7 +86,7 @@ object BrowsePrefs {
     }
 }
 
-private val SORTS = listOf("Neu hinzugefügt", "Beliebtheit", "Rating: beste zuerst", "Rating: schwächste zuerst", "Jahr: neueste zuerst", "Jahr: älteste zuerst", "A–Z", "Z–A", "Playlist")
+internal val SORTS = listOf("Neu hinzugefügt", "Beliebtheit", "Rating: beste zuerst", "Rating: schwächste zuerst", "Jahr: neueste zuerst", "Jahr: älteste zuerst", "A–Z", "Z–A", "Playlist")
 private val RATING_LABELS = listOf("Alle", "≥ 5", "≥ 6", "≥ 7", "≥ 8", "≥ 9")
 private val RATING_VALUES = listOf(0.0, 5.0, 6.0, 7.0, 8.0, 9.0)
 private val DECADES = listOf("2020er", "2010er", "2000er", "1990er", "vor 1990")
@@ -136,7 +136,7 @@ private fun ofSource(items: List<Item>, k: Int): List<Item> {
     return items.mapNotNull { i -> (if (PlaylistStore.inSource(i, k)) i else PlaylistStore.twin(i, k))?.takeIf { seen.add(it.id) } }
 }
 
-private fun filterAndSort(items: List<Item>, k: BrowseKey): List<Item> {
+internal fun filterAndSort(items: List<Item>, k: BrowseKey): List<Item> {
     val minR = RATING_VALUES[k.minRi]
     val f = ofSource(items, k.source).filter { i ->
         val m = MetaRepo.cached(i)
@@ -167,6 +167,7 @@ fun BrowseScreen(
     all: List<Item> = emptyList(), onPlay: (Item, String, String, Long) -> Unit = { _, _, _, _ -> },
     onPerson: (PersonRef) -> Unit = {}
 ) {
+    if (com.ipvio.stream.mobile.MobileUi.active) { com.ipvio.stream.mobile.MobileBrowse(state, gridState, onOpen, onBack); return }   // phones/tablets (fork)
     val ctx = LocalContext.current
     BrowsePrefs.init(ctx)
     val req = state.req
