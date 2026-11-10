@@ -1299,7 +1299,7 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
         // ---------------------------------------------------------------- Steuerleiste
         AnimatedVisibility(
             // No control bar under the TV guide: otherwise focus could slip from the guide into this menu
-            visible = controls && !showGuide,
+            visible = controls && !showGuide && !com.ipvio.stream.mobile.MobileUi.active,   // phones/tablets: MobilePlayerBar (fork)
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(tween(160)),
             exit = fadeOut(tween(120))
@@ -1553,6 +1553,26 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
                     }
                 }
             }
+        }
+
+        if (com.ipvio.stream.mobile.MobileUi.active) {   // phones/tablets: touch controls (fork)
+            val now = System.currentTimeMillis()
+            val arch = cur.archive != null
+            com.ipvio.stream.mobile.MobilePlayerBar(
+                visible = controls && !showGuide && panel == Panel.NONE && !showChannels, live = cur.live,
+                title = if (cur.season > 0 && cur.episode > 0) cur.title.substringBeforeLast(" S" + cur.season + "E" + cur.episode) else cur.title,
+                subtitle = if (cur.live) epg.firstOrNull { now in it.start until it.end }?.title
+                    else if (cur.season > 0 && cur.episode > 0) "S" + cur.season + " E" + cur.episode + (epName?.let { " · $it" } ?: "") else null,
+                playing = playing, pos = posNow, dur = durNow, buf = bufNow, stepSec = (step / 1000).toInt(),
+                onInteract = { interact = System.currentTimeMillis() }, onBack = { if (arch && curItem != null) backToLive() else onBack() }, onToggle = { togglePlay() },
+                onStep = { stepSeek(it, fromBar = false) }, onSeekTo = { player.seekTo(it); pos = it },
+                prev = if (cur.live) ({ zap(-1) }) else if (!arch && hasPrev) ({ playEpisode(epList[epIdx - 1]) }) else null,
+                next = if (cur.live) ({ zap(1) }) else if (!arch && hasNext) ({ playEpisode(epList[epIdx + 1]) }) else null,
+                onTracks = { openPanel(Panel.TRACKS) }, onSettings = { openPanel(Panel.MENU) },
+                onEpisodes = if (epList.size > 1) ({ openPanel(Panel.EPISODES) }) else null,
+                onChannels = if (cur.live) ({ openChannels() }) else null,
+                onGuide = if (cur.live) ({ showGuide = true }) else null
+            )
         }
 
         // ---------------------------------------------------------------- Senderliste & TV-Guide

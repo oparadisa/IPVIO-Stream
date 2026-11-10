@@ -45,7 +45,9 @@ class DictMobileTest {
         "Meine Liste", "In Meiner Liste", "Zu Favoriten", "Favorit", "Als gesehen markieren", "Als ungesehen markieren",
         "Aus „Zuletzt geschaut“ entfernen", "Regie", "Folgen", "Staffel 2", "Besetzung", "Ähnliche Titel in deiner Playlist",
         "Folgen werden geladen …", "Die Folgen konnten nicht geladen werden. Verbindung oder Zugang prüfen.", "Erneut versuchen",
-        "Keine Beschreibung gefunden.", "1 Staffel", "3 Staffeln"
+        "Keine Beschreibung gefunden.", "1 Staffel", "3 Staffeln",
+        "Audio & Untertitel", "Einstellungen", "Hochformat", "Querformat", "Vorheriger Sender", "Nächster Sender",
+        "Vorherige Folge", "Nächste Folge", "10 Sekunden zurück", "10 Sekunden vor", "Senderliste"
     )
 
     @Test fun mobileScreenTextsAreTranslated() {

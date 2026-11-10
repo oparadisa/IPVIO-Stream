@@ -10,6 +10,10 @@ Diese Playlist enthält keine Filme oder Serien.¦This playlist has no movies or
 {#0} Treffer¦{#0} results¦{#0} sonuç¦{#0} rezultata¦{#0} rezultata¦{#0} rezultata¦{#0} resultados¦{#0} résultats¦{#0} risultati
 Keine Kategorien¦No categories¦Kategori yok¦Nema kategorija¦Nema kategorija¦Nema kategorija¦Sin categorías¦Aucune catégorie¦Nessuna categoria
 Titel, Sender, Schauspieler …¦Titles, channels, actors …¦Başlık, kanal, oyuncu …¦Naslovi, kanali, glumci …¦Naslovi, kanali, glumci …¦Naslovi, kanali, glumci …¦Títulos, canales, actores …¦Titres, chaînes, acteurs …¦Titoli, canali, attori …
+Hochformat¦Portrait¦Dikey¦Uspravno¦Uspravno¦Uspravno¦Vertical¦Portrait¦Verticale
+Querformat¦Landscape¦Yatay¦Položeno¦Položeno¦Položeno¦Horizontal¦Paysage¦Orizzontale
+Vorheriger Sender¦Previous channel¦Önceki kanal¦Prethodni kanal¦Prethodni kanal¦Prethodni kanal¦Canal anterior¦Chaîne précédente¦Canale precedente
+Nächster Sender¦Next channel¦Sonraki kanal¦Sljedeći kanal¦Sljedeći kanal¦Sledeći kanal¦Canal siguiente¦Chaîne suivante¦Canale successivo
 """
 
 val DictNlMobile = """
@@ -20,4 +24,8 @@ Diese Playlist enthält keine Filme oder Serien.¦Deze playlist bevat geen films
 {#0} Treffer¦{#0} resultaten
 Keine Kategorien¦Geen categorieën
 Titel, Sender, Schauspieler …¦Titels, zenders, acteurs …
+Hochformat¦Staand
+Querformat¦Liggend
+Vorheriger Sender¦Vorige zender
+Nächster Sender¦Volgende zender
 """
