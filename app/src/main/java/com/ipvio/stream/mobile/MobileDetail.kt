@@ -150,10 +150,14 @@ private fun DetailBody(
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 32.dp)) {
         item(key = "hero") {
-            Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(Surf2)) {
+            // 16:9, but at most 45 % of the screen height so a landscape tablet still shows title and Play
+            val maxH = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.45f).dp
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+            Box(Modifier.fillMaxWidth().height(minOf(maxWidth * 9f / 16f, maxH)).background(Surf2)) {
                 (m?.backdrop ?: m?.poster)?.let { AsyncImage(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color(0x66000000), 0.35f to Color.Transparent, 1f to Bg)))
                 Box(Modifier.padding(4.dp)) { MIconButton(AIcon.Left, "Zurück", onClick = onBack) }
+            }
             }
         }
         item(key = "head") {
