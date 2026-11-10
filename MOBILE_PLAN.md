@@ -163,3 +163,13 @@ Local build with Android Studio's JBR + SDK platform 37 (`local.properties`, git
 - `FileProvider` authority is `${applicationId}.fileprovider` and the code uses `packageName`, so both follow the new ID.
 - Kotlin package / `namespace` stay `com.ipvio.stream` (no source moves, which keeps upstream merges cheap).
 - `README.md` asks forks to use their own name and logo: the fork is named **Couchless** (`io.github.oparadisa.couchless`) with its own launcher icon and TV banner (vector drawables, sofa + play mark). The in-app header logo (`ic_brand_mark.png`, `Brand.kt`) and the "IPVIO Stream" wording inside the app are still upstream's (see open points).
+
+## Phase 7 inventory (phone, before the changes)
+Forced landscape: person page, Boomer mode, Sport (LandscapeOnPhone in MainActivity). Removed in Phase 7: these screens now have phone layouts; only the player still picks its orientation.
+TV layout on a phone:
+- Sport (hub and its Match/League/Team/Player/Watch pages): scaled to about a third in portrait. First step done: portrait uses a 760 px design width (MobileLogic.designWidth), so the cards keep their landscape size. Still open: rows clipped at the right page padding; the Center pages and tables are unchecked.
+- Boomer mode (BoomerHome, PIN pad): TV layout with dpx sizes.
+- Person page (CastUi PersonScreen): TV layout. It can't be reached on the emulators because the backup has no TMDB key.
+- Settings sub-pages: most work. Broken: Design and color (fixed side preview squeezes everything), View (text squeezed next to the preview), Customize home (text column next to three buttons). Button and chip rows don't wrap (Storage, Playlists, Audio, Diagnostics) and need a wrapping row on mobile.
+- Add playlist / Restore backup: usable in portrait and landscape.
+- Still to check: profile picker, guide search dialog, live View preview bar, reminder card, update prompt.

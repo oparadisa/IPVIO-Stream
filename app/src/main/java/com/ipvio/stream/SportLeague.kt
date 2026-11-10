@@ -552,7 +552,8 @@ internal fun UpcomingRow(g: SportData.Game, hub: HubCtx) {
             Text("vs", color = Muted, fontSize = spx(15), textAlign = TextAlign.Center, modifier = Modifier.width(dpx(50)))
             TeamName(g.away, 0, Modifier.weight(1f), logoSize = 26)
         }
-        Text(raw = true, text = g.groupName, color = Muted, fontSize = spx(13), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(dpx(180)), textAlign = TextAlign.End)
+        // fork: a phone held upright leaves the competition out (the teams need the room)
+        if (!com.ipvio.stream.mobile.narrowMobile()) Text(raw = true, text = g.groupName, color = Muted, fontSize = spx(13), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(dpx(180)), textAlign = TextAlign.End)
         if (hub.chans(g).isNotEmpty()) AppIcon(AIcon.Play, Accent2, size = dpx(18))
     }
 }
@@ -589,7 +590,13 @@ internal fun LeagueCenterPage(l: SportData.League, hub: HubCtx) {
     val first = remember { FocusRequester() }
     val fav = SportHubFavs.leagues.contains(l.path)
     HubPageFrame(l.name, Lang.tr(SportData.sportLabel(l.sport)), { hub.nav.pop() }, first) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dpx(20))) {
+        if (com.ipvio.stream.mobile.MobileUi.active) {   // fork: phones/tablets give the tabs their own line
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                TeamLogo(SportData.leagueLogos[l.path], l.name, dpx(70))
+                FavoriteButton(fav) { SportHubFavs.toggleLeague(ctx, l.path) }
+            }
+            HubTabs(tabs, cur, first, Modifier.fillMaxWidth()) { tab = it }
+        } else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dpx(20))) {
             TeamLogo(SportData.leagueLogos[l.path], l.name, dpx(70))
             HubTabs(tabs, cur, first, Modifier.weight(1f)) { tab = it }
             FavoriteButton(fav) { SportHubFavs.toggleLeague(ctx, l.path) }
@@ -683,10 +690,11 @@ internal fun TeamCenterPage(l: SportData.League, t: SportData.Team, hub: HubCtx)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(dpx(8))) {
                 Text(raw = true, text = listOf(det?.standing.orEmpty(), det?.record.orEmpty(), det?.venue.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
                     color = Muted, fontSize = spx(15), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                HubTabs(tabs, cur, first) { tab = it }
+                if (!com.ipvio.stream.mobile.MobileUi.active) HubTabs(tabs, cur, first) { tab = it }
             }
             FavoriteButton(SportHubFavs.isTeam(t)) { SportHubFavs.toggleTeam(ctx, l, SportData.Team(t.name, t.short, t.abbr, logo, null, false, null, t.color, t.id)) }
         }
+        if (com.ipvio.stream.mobile.MobileUi.active) HubTabs(tabs, cur, first, Modifier.fillMaxWidth()) { tab = it }   // fork: own line on phones/tablets
         LazyColumn(Modifier.fillMaxWidth().weight(1f), contentPadding = PaddingValues(bottom = dpx(30)), verticalArrangement = Arrangement.spacedBy(dpx(4))) {
             when (cur) {
                 "Tabelle" -> myGroup?.let { standingsItems(it, t.id) { x -> if (x.id != t.id) hub.nav.open(HubPage.Team(l, x)) } }
@@ -720,7 +728,7 @@ internal fun TeamCenterPage(l: SportData.League, t: SportData.Team, hub: HubCtx)
                         else HubLoading("Lade Details …")
                     } else {
                         item(key = "panels") {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dpx(14))) {
+                            com.ipvio.stream.mobile.SideBySide(dpx(14), Modifier.fillMaxWidth()) {   // fork: stacked on a phone held upright
                                 HubPanel(Modifier.weight(0.8f)) {
                                     Text("Aktuelle Position", color = Tok.TextHi, fontSize = spx(17), fontWeight = FontWeight.Bold)
                                     val rank = det.rank.ifBlank { myGroup?.rows?.firstOrNull { it.team.id == t.id }?.rank.orEmpty() }

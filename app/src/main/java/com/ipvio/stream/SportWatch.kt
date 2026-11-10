@@ -115,7 +115,7 @@ internal fun WatchPage(g0: SportData.Game, hub: HubCtx) {
     HubPageFrame("Live ansehen", g.groupName, { hub.nav.pop() }, first, rawTitle = false) {
         HubPanel(Modifier.fillMaxWidth()) {
             MatchHeader(g, 90)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dpx(12))) {
+            com.ipvio.stream.mobile.WrapRow(dpx(12), center = true) {   // fork: phones/tablets wrap the buttons
                 if (hits.isNotEmpty()) HeroButton("Live ansehen", AIcon.Play, true, Modifier, 46) { hub.watch(g) }
                 FilterPill(if (hits.isEmpty()) "Sender zuordnen" else "Anderen Sender wählen", false, Modifier.focusRequester(first), aicon = AIcon.Edit) { pick = true }
                 if (SportFix.map.containsKey(SportFix.key(g))) FilterPill("Automatisch zuordnen", false, Modifier.trackFocus(), aicon = AIcon.Refresh) { SportFix.set(ctx, g, null) }

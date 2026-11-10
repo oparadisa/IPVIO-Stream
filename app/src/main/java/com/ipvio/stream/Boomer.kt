@@ -194,8 +194,8 @@ class BoomerData(all: List<Item>) {
     val series: List<Item> = all.filter { it.kind == Kind.SERIES }
 }
 
-private class BTile(val key: String, val title: String, val logo: String?, val onClick: () -> Unit)
-private class BRow(val id: String, val label: String, val tiles: List<BTile>)
+internal class BTile(val key: String, val title: String, val logo: String?, val onClick: () -> Unit)
+internal class BRow(val id: String, val label: String, val tiles: List<BTile>)
 
 private fun vodRow(id: String, label: String, list: List<Item>, onVod: (Item) -> Unit): BRow? =
     if (list.isEmpty()) null else BRow(id, label, list.map { i -> BTile("v" + i.id, i.title, i.logo) { onVod(i) } })
@@ -290,6 +290,13 @@ fun BoomerHome(
         }
     }
 
+    if (com.ipvio.stream.mobile.MobileUi.active) {   // phones/tablets (fork): same rows and PIN, touch layout
+        com.ipvio.stream.mobile.MobileBoomer(rows, loading || d == null, askPin, pinErr,
+            onAskPin = { pinErr = null; askPin = true },
+            onPin = { if (Parental.verify(ctx, it)) Boomer.setEnabled(ctx, false) else pinErr = Parental.pinError() },
+            onCancel = { askPin = false })
+        return
+    }
     Box(
         Modifier.fillMaxSize().background(Color(0xFF0B0B10)).onPreviewKeyEvent { e ->
             if (!askPin && e.key == Key.Back) {
@@ -515,7 +522,7 @@ internal fun BoomerPage(ctx: Context, onExit: () -> Unit) {
                     ToggleRow("Animationen", "Die markierte Kachel wird leicht größer. Ausschalten = alles bleibt ruhig.", Boomer.anim) { Boomer.setAnim(ctx, it) }
                     ToggleRow("Logos und Bilder zeigen", "Aus = nur der Name in großer Schrift.", Boomer.logos) { Boomer.setLogos(ctx, it) }
                 }
-                BoomerPreview(Modifier.width(dpx(560)))
+                if (!com.ipvio.stream.mobile.MobileUi.active) BoomerPreview(Modifier.width(dpx(560)))   // fork: phones/tablets have other tiles (no room beside the controls either)
             }
             SectionTitle("So kommst du wieder heraus")
             Hint("Zurück-Taste 10 Sekunden gedrückt halten, dann die PIN eingeben. Am Handy: die Überschrift „Was möchtest du sehen?“ lange berühren.")

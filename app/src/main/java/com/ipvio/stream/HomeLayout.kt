@@ -133,7 +133,20 @@ internal fun BlockLayoutPage(ctx: Context, layout: BlockLayout, intro: String) {
         val b = layout.block(id) ?: return@forEach
         key(id) {
             val on = layout.shown(id)
-            Row(
+            val buttons: @Composable () -> Unit = {
+                if (b.fixed) Text("Immer oben", color = Muted, fontSize = 13.sp)
+                else SmallPill(if (on) "Gezeigt" else "Versteckt", icon = if (on) AIcon.Eye else AIcon.EyeOff) { layout.setShown(ctx, id, !on) }
+                if (!b.fixed) {
+                    SmallPill("Hoch", icon = AIcon.Up) { layout.move(ctx, id, -1) }
+                    SmallPill("Runter", icon = AIcon.Down) { layout.move(ctx, id, 1) }
+                }
+            }
+            // fork: phones/tablets put the buttons under the name (no room beside it on a phone)
+            if (com.ipvio.stream.mobile.MobileUi.active) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(b.title, color = if (on) Color.White else Muted, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Text(b.sub, color = Muted, fontSize = 13.sp)
+                com.ipvio.stream.mobile.WrapRow(10.dp, content = buttons)
+            } else Row(
                 Modifier.fillMaxWidth().widthIn(max = 900.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -141,12 +154,7 @@ internal fun BlockLayoutPage(ctx: Context, layout: BlockLayout, intro: String) {
                     Text(b.title, color = if (on) Color.White else Muted, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     Text(b.sub, color = Muted, fontSize = 13.sp)
                 }
-                if (b.fixed) Text("Immer oben", color = Muted, fontSize = 13.sp)
-                else SmallPill(if (on) "Gezeigt" else "Versteckt", icon = if (on) AIcon.Eye else AIcon.EyeOff) { layout.setShown(ctx, id, !on) }
-                if (!b.fixed) {
-                    SmallPill("Hoch", icon = AIcon.Up) { layout.move(ctx, id, -1) }
-                    SmallPill("Runter", icon = AIcon.Down) { layout.move(ctx, id, 1) }
-                }
+                buttons()
             }
         }
     }
@@ -156,8 +164,10 @@ internal fun BlockLayoutPage(ctx: Context, layout: BlockLayout, intro: String) {
 /** Einstellungsseite „Startseite anpassen“. */
 @Composable
 internal fun HomeLayoutPage(ctx: Context) {
-    PillButton("Direkt auf der Startseite bearbeiten", light = true, icon = AIcon.Sliders) { HomeEdit.active = true; AppNav.homeSignal++ }
-    Hint("Öffnet die echte Startseite mit deinen Titeln. Über jeder Reihe erscheint eine Leiste zum Verschieben und Ein- oder Ausblenden.")
+    if (!com.ipvio.stream.mobile.MobileUi.active) {   // fork: the edit mode lives on the TV home screen
+        PillButton("Direkt auf der Startseite bearbeiten", light = true, icon = AIcon.Sliders) { HomeEdit.active = true; AppNav.homeSignal++ }
+        Hint("Öffnet die echte Startseite mit deinen Titeln. Über jeder Reihe erscheint eine Leiste zum Verschieben und Ein- oder Ausblenden.")
+    }
     BlockLayoutPage(
         ctx, HomeLayout,
         "Oder hier in der Liste: Schalte Reihen und Widgets ein oder aus und schiebe sie mit „Hoch“ und „Runter“ an die Stelle, die du möchtest. Die Änderung gilt sofort."

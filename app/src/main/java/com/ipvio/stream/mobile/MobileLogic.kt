@@ -71,6 +71,12 @@ object MobileLogic {
         else -> GuideDims.TV
     }
 
+    /** Design width (TV design px) the TV-scaled screens are laid out for: [tvWidth], or [PHONE_DESIGN_W] for Sport on a phone held upright. */
+    fun designWidth(tvWidth: Float, phonePortraitSport: Boolean): Float = if (phonePortraitSport) PHONE_DESIGN_W else tvWidth
+
+    /** About the width of a phone in landscape in design px, so Sport's cards keep the size they have there. */
+    const val PHONE_DESIGN_W = 760f
+
     enum class Back { GO_HOME, SCROLL_TOP, EXIT }
 
     /** System back on the main screen of a phone/tablet: other area → Home, Home scrolled → top, Home at the top → leave. */
