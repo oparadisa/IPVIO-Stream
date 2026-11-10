@@ -5,7 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -44,6 +50,7 @@ import com.ipvio.stream.Item
 import com.ipvio.stream.Lang
 import com.ipvio.stream.Library
 import com.ipvio.stream.LiveMemory
+import com.ipvio.stream.LiveNowPanel
 import com.ipvio.stream.MenuLogic
 import com.ipvio.stream.Text
 import com.ipvio.stream.Tok
@@ -76,8 +83,18 @@ internal fun MobileLive(live: List<Item>, groups: Map<String, List<Item>>, favs:
     }
     val listState = rememberLazyListState()
     LaunchedEffect(sel) { listState.scrollToItem(0) }
+    // Wide tablets: list │ preview. The first tap selects a channel, a second tap (or Play) starts it.
+    val wide = twoPane()
+    var picked by remember { mutableStateOf<Item?>(null) }
+    val cur = picked?.takeIf { p -> shown.any { it.id == p.id } } ?: shown.firstOrNull()
+    fun play(ch: Item) {
+        // Zapping in the player stays inside the list the channel was picked from
+        ZapContext.list = shown; ZapContext.key = if (searching) null else sel
+        onOpen(ch)
+    }
 
-    Column(Modifier.fillMaxSize()) {
+    Row(Modifier.fillMaxSize()) {
+    Column(if (wide) Modifier.width(listPaneWidth()).fillMaxHeight() else Modifier.fillMaxSize()) {
         if (searching) SearchField(query, "Sender suchen", { query = it }) { searching = false; query = "" }
         else Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) {
@@ -95,15 +112,29 @@ internal fun MobileLive(live: List<Item>, groups: Map<String, List<Item>>, favs:
         LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) {
             if (shown.isEmpty()) item { MEmpty(AIcon.Live, if (searching) "Keine Treffer" else "Noch keine Sender") }
             items(shown, key = { it.id }) { ch ->
-                MChannelRow(ch, onLong = {
+                MChannelRow(ch, selected = wide && ch.id == cur?.id, onLong = {
                     Library.toggleFav(ctx, ch.id)
                     Toast.makeText(ctx, Lang.tr(if (Library.isFav(ch.id)) "Zu Favoriten hinzugefügt" else "Aus Favoriten entfernt"), Toast.LENGTH_SHORT).show()
-                }) {
-                    // Zapping in the player stays inside the list the channel was picked from
-                    ZapContext.list = shown; ZapContext.key = if (searching) null else sel
-                    onOpen(ch)
-                }
+                }) { if (wide && ch.id != cur?.id) picked = ch else play(ch) }
             }
+        }
+    }
+    if (wide && cur != null) LivePreview(cur) { play(cur) }
+    }
+}
+
+/** Right pane on wide tablets: logo, what is on now and next (the TV's [LiveNowPanel]), Play and TV guide. */
+@Composable
+private fun RowScope.LivePreview(ch: Item, onPlay: () -> Unit) {
+    Column(
+        Modifier.weight(1f).fillMaxHeight().background(Tok.Card.copy(alpha = 0.35f)).verticalScroll(rememberScrollState()).padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        MLogo(ch, 160.dp, 110.dp)
+        TvDensity { LiveNowPanel(ch) }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            MButton("Abspielen", AIcon.Play, primary = true, onClick = onPlay)
+            MButton("TV-Guide", AIcon.Live) { MobileNav.onTab(MenuLogic.EPG) }
         }
     }
 }

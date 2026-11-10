@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -148,8 +149,14 @@ private fun DetailBody(
     }
     var descOpen by remember(item.id) { mutableStateOf(false) }
 
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 32.dp)) {
-        item(key = "hero") {
+    // Scene image with the back arrow; [fill] = the whole pane (movie on a wide tablet), else 16:9
+    val hero: @Composable (Boolean) -> Unit = { fill ->
+        if (fill) Box(Modifier.fillMaxSize().background(Surf2)) {
+            (m?.backdrop ?: m?.poster)?.let { AsyncImage(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.6f to Color.Transparent, 1f to Bg)))
+            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color(0x66000000), 0.3f to Color.Transparent)))
+            Box(Modifier.padding(4.dp)) { MIconButton(AIcon.Left, "Zurück", onClick = onBack) }
+        } else {
             // 16:9, but at most 45 % of the screen height so a landscape tablet still shows title and Play
             val maxH = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.45f).dp
             androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -160,6 +167,9 @@ private fun DetailBody(
             }
             }
         }
+    }
+    fun LazyListScope.top(withHero: Boolean) {
+        if (withHero) item(key = "hero") { hero(false) }
         item(key = "head") {
             Column(Modifier.padding(horizontal = PadX), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(item.title, raw = true, color = Tok.TextHi, fontSize = 26.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -234,6 +244,8 @@ private fun DetailBody(
                 }
             }
         }
+    }
+    fun LazyListScope.episodes() {
         if (isSeries) {
             if (seasons.size > 1) item(key = "seasons") {
                 Column(Modifier.padding(top = 16.dp)) {
@@ -253,6 +265,8 @@ private fun DetailBody(
                 }) { playEp(ep) }
             }
         }
+    }
+    fun LazyListScope.extras() {
         credits?.cast?.takeIf { it.isNotEmpty() }?.let { cast ->
             item(key = "casth") { MSection("Besetzung") }
             item(key = "cast") {
@@ -281,6 +295,17 @@ private fun DetailBody(
             Text("Dieses Produkt verwendet die TMDB-API, wird aber nicht von TMDB unterstützt oder zertifiziert.", color = Tok.TextLow, fontSize = 12.sp, modifier = Modifier.padding(horizontal = PadX, vertical = 24.dp))
         }
     }
+
+    // fork phase 5: wide tablets get two panes. Series: picture, info, cast │ seasons and episodes. Movie: picture │ info, cast, similar.
+    if (twoPane()) Row(Modifier.fillMaxSize()) {
+        if (isSeries) {
+            LazyColumn(Modifier.weight(0.45f).fillMaxHeight(), contentPadding = PaddingValues(bottom = 32.dp)) { top(true); extras() }
+            LazyColumn(Modifier.weight(0.55f).fillMaxHeight(), contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)) { episodes() }
+        } else {
+            Box(Modifier.weight(0.45f).fillMaxHeight()) { hero(true) }
+            LazyColumn(Modifier.weight(0.55f).fillMaxHeight(), contentPadding = PaddingValues(top = 24.dp, bottom = 32.dp)) { top(false); extras() }
+        }
+    } else LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 32.dp)) { top(true); episodes(); extras() }
 }
 
 /** One episode: still image (when known), number and title, runtime, progress / watched mark. */

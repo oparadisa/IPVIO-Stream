@@ -1,6 +1,6 @@
 # Mobile plan: Couchless (IPVIO Stream fork) on phones and tablets
 
-Status: **Approved** (2026-11-09) with the review notes in section 8. Phase 1 in progress.
+Status: **Approved** (2026-11-09) with the review notes in section 8. Phases 1–4 merged; phase 5 in progress.
 
 ## 1. What the codebase gives us today
 
@@ -108,6 +108,12 @@ Every phase ends with `./gradlew testDebugUnitTest assembleDebug` green on GitHu
 3. **Main screens**: Home/Movies/Series/Favorites/My list/History, Live TV, Browse/Categories grid, Detail, Search, Settings list (phone layouts).
 4. **Player**: overlay, gestures, seek bar, auto-landscape, rotation lock, immersive, PiP + lifecycle fix.
 5. **Tablet layouts**: rail polish, two-pane Live TV, Detail (seasons │ episodes), Categories, Settings.
+6. **Portrait TV guide and player leftovers** (deferred from phases 4 and 5):
+   - Portrait TV guide (see 8.3).
+   - TV guide on touch: dragging along the time axis doesn't scroll yet, and it still shows the TV key legend.
+   - Channel list in the player: long-press for favorite.
+   - Archive / catch-up panel: it can't be opened on mobile (no button), and it has no close X.
+   - PiP window: its own play/pause button (needs a media session).
 
 ## 6. Risks
 

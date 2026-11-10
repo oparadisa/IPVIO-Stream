@@ -49,6 +49,12 @@ object MobileLogic {
     fun railItems(visible: List<Int>): List<Int> =
         visible.filter { it != MenuLogic.SETTINGS } + listOfNotNull(MenuLogic.SETTINGS.takeIf { it in visible })
 
+    /** List and content side by side (Live TV, detail, categories, settings) from the expanded width on; below that one pane. */
+    fun twoPane(widthDp: Int): Boolean = sizeClass(widthDp) == SizeClass.EXPANDED
+
+    /** Width of the list pane next to the content: a third of the window, 280 to 400 dp. */
+    fun listPaneDp(widthDp: Int): Int = (widthDp / 3).coerceIn(280, 400)
+
     enum class Back { GO_HOME, SCROLL_TOP, EXIT }
 
     /** System back on the main screen of a phone/tablet: other area → Home, Home scrolled → top, Home at the top → leave. */
