@@ -210,7 +210,7 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
     LaunchedEffect(second, audioOnSecond) { player.volume = if (second != null && audioOnSecond) 0f else 1f }
     LaunchedEffect(showChannels) { if (!showChannels) pickSecond = false }
     var showCats by remember { mutableStateOf(false) }
-    var showGuide by remember { mutableStateOf(false) }
+    var showGuide by remember { mutableStateOf(com.ipvio.stream.mobile.MobileUi.active && AppNav.openGuide && req.live) }   // fork: phones open the guide at once (no landscape flash)
     // Started from Live TV via "TV guide": show the guide immediately
     LaunchedEffect(Unit) { if (AppNav.openGuide) { AppNav.openGuide = false; if (req.live) { controls = false; showGuide = true } } }
     var inHeader by remember { mutableStateOf(false) }
@@ -1582,7 +1582,8 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
                 onChannels = if (cur.live) ({ openChannels() }) else null,
                 onGuide = if (cur.live) ({ showGuide = true }) else null,
                 onArchive = if (cur.live && Catchup.has(curItem)) ({ openPanel(Panel.ARCHIVE) }) else null,
-                onPip = { controls = false; showGuide = false; showChannels = false; if (panel != Panel.NONE) closePanel() }
+                onPip = { controls = false; showGuide = false; showChannels = false; if (panel != Panel.NONE) closePanel() },
+                guide = showGuide
             )
         }
 

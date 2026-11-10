@@ -14,10 +14,14 @@ object PlayerTouchLogic {
     /** Phones play in landscape unless the user turned the screen to portrait; tablets follow the sensor. */
     fun lockLandscape(isPhone: Boolean, portrait: Boolean): Boolean = isPhone && !portrait
 
-    /** Requested orientation: rotation lock keeps the current one; otherwise phones turn within landscape/portrait, tablets follow the system. */
-    fun orientation(isPhone: Boolean, portrait: Boolean, locked: Boolean): Int = when {
+    /**
+     * Requested orientation: rotation lock keeps the current one; otherwise phones turn within landscape/portrait, tablets follow the system.
+     * While the TV guide is open ([guide]) a phone follows how it is held (portrait guide when upright).
+     */
+    fun orientation(isPhone: Boolean, portrait: Boolean, locked: Boolean, guide: Boolean = false): Int = when {
         locked -> ActivityInfo.SCREEN_ORIENTATION_LOCKED
         !isPhone -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        guide -> ActivityInfo.SCREEN_ORIENTATION_USER
         lockLandscape(isPhone, portrait) -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
     }

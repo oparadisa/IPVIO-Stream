@@ -184,6 +184,14 @@ fun Guide(
     }
     LaunchedEffect(GuidePrefs.zoom) { infoE?.let { shiftFor(it) } }
 
+    // fork: details of a tapped program (phones/tablets)
+    var sheet by remember { mutableStateOf<Pair<Item, EpgEntry>?>(null) }
+    sheet?.let { (ch, e) ->
+        val close = { sheet = null; GuideBack.mutedUntil = System.currentTimeMillis() + 400 }
+        com.ipvio.stream.mobile.GuideProgramSheet(ch, e,
+            onWatch = { close(); val p = onPickIn; if (p != null) p(ch, shown) else onPick(ch) },
+            onFromStart = { close(); onArchive(ch, e) }, onDismiss = close)
+    }
     if (showSearch) GuideSearchDialog(
         all,
         onPick = { ch -> showSearch = false; val p = onPickIn; if (p != null) p(ch, all) else onPick(ch) },
@@ -327,7 +335,8 @@ fun Guide(
                                 // Left from the channel column: to the categories (before: close)
                                 onClose = { if (!runCatching { catReq.requestFocus() }.isSuccess) onClose() },
                                 onArchive = { e -> onArchive(ch, e) },
-                                onPick = { val p = onPickIn; if (p != null) p(ch, shown) else onPick(ch) }
+                                onPick = { val p = onPickIn; if (p != null) p(ch, shown) else onPick(ch) },
+                                onTouchPick = { e -> sheet = ch to e }
                             )
                         }
                     }
@@ -426,7 +435,7 @@ private fun GuideDetailPanel(e: EpgEntry?, ch: Item?, nowSec: Long, modifier: Mo
         Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             if (e == null || ch == null) {
                 Text("TV-Guide", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-                if (com.ipvio.stream.mobile.MobileUi.active) { Text("Tippe auf eine Sendung: ansehen, Erinnerung setzen oder aus dem Archiv.", color = PT.T2, fontSize = 14.sp); return@Column }   // fork
+                if (com.ipvio.stream.mobile.MobileUi.active) { Text("Tippe auf eine Sendung für Details: ansehen, erinnern oder von Anfang an.", color = PT.T2, fontSize = 14.sp); return@Column }   // fork
                 Text("Wähle eine Sendung mit den Pfeiltasten, OK schaltet auf den Sender.", color = PT.T2, fontSize = 14.sp)
                 Text("Zurück: zum Sender, dann zur Kategorie, dann schließen.", color = Muted, fontSize = 13.sp)
                 return@Column
@@ -483,7 +492,8 @@ private fun guideOkAction(e: EpgEntry?, ch: Item?, nowSec: Long): String {
 private fun GuideRow(
     ch: Item, current: Boolean, winStart: Long, viewMin: Int, dpm: Float, nowSec: Long, rowH: Dp, hidePast: Boolean,
     cellReq: FocusRequester, chW: Dp, onInfo: (EpgEntry?) -> Unit, onShift: (EpgEntry) -> Unit,
-    onBlock: (Boolean, FocusRequester) -> Unit, onClose: () -> Unit, onArchive: (EpgEntry) -> Unit, onPick: () -> Unit
+    onBlock: (Boolean, FocusRequester) -> Unit, onClose: () -> Unit, onArchive: (EpgEntry) -> Unit, onPick: () -> Unit,
+    onTouchPick: (EpgEntry) -> Unit = {}   // fork: phones/tablets
 ) {
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
@@ -593,7 +603,7 @@ private fun GuideRow(
                             // Later show: OK sets/deletes the reminder (round 14: without a selection window);
                             // in the archive: play the show; otherwise watch the channel
                             .clickable {
-                                if (com.ipvio.stream.mobile.MobileUi.active) onInfo(e)   // fork: a tap shows the show (touch moves no focus)
+                                if (com.ipvio.stream.mobile.MobileUi.active) { onInfo(e); onTouchPick(e); return@clickable }   // fork: a tap opens the details first
                                 val n = System.currentTimeMillis() / 1000
                                 if (ReminderLogic.canRemind(e.start, n)) {
                                     val on = Reminders.toggle(ctx, Reminder(ch.id, ch.title, e.title, e.start, e.end))
