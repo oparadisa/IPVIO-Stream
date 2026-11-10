@@ -1184,11 +1184,12 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
 
         // ---------------------------------------------------------------- Meldungen
         if (buffering && msg == null && !showGuide) {
-            Spinner(Accent2, Modifier.align(Alignment.Center).size(48.dp))
+            Spinner(Accent2, Modifier.align(Alignment.Center).then(com.ipvio.stream.mobile.belowCenterControls(controls)).size(48.dp))   // fork
         }
         msg?.takeIf { !Boomer.enabled }?.let { m ->
             Box(
-                Modifier.align(Alignment.Center).clip(RoundedCornerShape(DS.RadiusM)).background(PT.PanelBg)
+                Modifier.align(Alignment.Center).then(com.ipvio.stream.mobile.belowCenterControls(controls))   // phones/tablets: below the touch buttons (fork)
+                    .clip(RoundedCornerShape(DS.RadiusM)).background(PT.PanelBg)
                     .padding(horizontal = 28.dp, vertical = 18.dp)
             ) { Text(m, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold) }
         }

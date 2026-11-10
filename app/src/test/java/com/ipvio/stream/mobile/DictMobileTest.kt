@@ -47,7 +47,9 @@ class DictMobileTest {
         "Folgen werden geladen …", "Die Folgen konnten nicht geladen werden. Verbindung oder Zugang prüfen.", "Erneut versuchen",
         "Keine Beschreibung gefunden.", "1 Staffel", "3 Staffeln",
         "Audio & Untertitel", "Einstellungen", "Hochformat", "Querformat", "Vorheriger Sender", "Nächster Sender",
-        "Vorherige Folge", "Nächste Folge", "10 Sekunden zurück", "10 Sekunden vor", "Senderliste"
+        "Vorherige Folge", "Nächste Folge", "10 Sekunden zurück", "10 Sekunden vor", "Senderliste",
+        "Zurück schließt das Menü", "Zurück = vorheriges Menü", "Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.",
+        "Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.", "Zurück mit der Zurück-Geste.", "Tippen = ansehen"
     )
 
     @Test fun mobileScreenTextsAreTranslated() {

@@ -26,3 +26,11 @@ class PlayerTouchLogicTest {
         assertFalse(PlayerTouchLogic.lockLandscape(isPhone = false, portrait = false))
     }
 }
+
+class TouchHintsTest {
+    @Test fun remoteHintsBecomeTouchHintsAndOtherTextsStay() {
+        assertEquals("Zurück schließt das Menü", TouchHints.of("Links schließt das Menü"))
+        assertEquals("Zurück mit der Zurück-Geste.", TouchHints.of("Zurück mit der Zurück-Taste."))
+        assertEquals("Abspielen", TouchHints.of("Abspielen"))
+    }
+}

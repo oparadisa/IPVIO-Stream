@@ -229,3 +229,12 @@ private tailrec fun Context.activity(): Activity? = when (this) {
     is ContextWrapper -> baseContext.activity()
     else -> null
 }
+
+/** Moves the player's status message below the center buttons while the touch controls show (used by PlayerScreen). */
+@Composable
+fun belowCenterControls(controls: Boolean): Modifier {
+    val nd = LocalNativeDensity.current
+    if (nd == null || !MobileUi.active || !controls) return Modifier
+    val y = with(nd) { 84.dp.roundToPx() }
+    return Modifier.offset { androidx.compose.ui.unit.IntOffset(0, y) }
+}
