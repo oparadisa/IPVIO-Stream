@@ -1,5 +1,6 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.MobileUi
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -132,6 +133,7 @@ fun SearchScreen(
         val moved = target != null && runCatching { target.requestFocus() }.getOrDefault(false)
         if (!moved) runCatching { sideFocus.requestFocus() }
     }
+    BackHandler(enabled = MobileUi.active) { onTab(0) }   // phones/tablets (fork): no sidebar, back leaves the search
 
     Box(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxSize().sidebarPad()) {

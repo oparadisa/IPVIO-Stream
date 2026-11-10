@@ -1,5 +1,6 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.MobileUi
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -52,7 +53,7 @@ internal fun ListImportPage(ctx: Context) {
         }
     }
     DisposableEffect(Unit) { onDispose { server.stop() } }
-    if (!serving) PillButton("Import im WLAN starten", icon = AIcon.Phone) { serving = server.start() }
+    if (!serving) { if (!MobileUi.active) PillButton("Import im WLAN starten", icon = AIcon.Phone) { serving = server.start() } }   // phones/tablets pick the file directly (fork)
     else {
         Column(
             Modifier.clip(RoundedCornerShape(DS.RadiusM)).background(Color(0x14FFFFFF)).padding(16.dp),

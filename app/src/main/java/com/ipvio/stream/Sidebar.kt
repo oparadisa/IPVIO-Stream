@@ -171,18 +171,19 @@ object SidebarPrefs {
 val TopBarH: androidx.compose.ui.unit.Dp get() = dpx(68)
 
 /** Space for the sidebar at the content (left, right or top). */
-fun Modifier.sidebarPad(): Modifier = when (SidebarPrefs.pos) {
+fun Modifier.sidebarPad(): Modifier = if (com.ipvio.stream.mobile.MobileUi.active) this else when (SidebarPrefs.pos) {
     SidebarPrefs.RIGHT -> this.padding(end = DS.SidebarW)
     SidebarPrefs.TOP -> this.padding(top = TopBarH)
     else -> this.padding(start = DS.SidebarW)
 }
 
 /** Distance from the left to the content (only with the bar on the left). */
-val SideStart: androidx.compose.ui.unit.Dp get() = if (SidebarPrefs.pos == SidebarPrefs.LEFT) DS.SidebarW else 0.dp
+val SideStart: androidx.compose.ui.unit.Dp get() = if (SidebarPrefs.pos == SidebarPrefs.LEFT && !com.ipvio.stream.mobile.MobileUi.active) DS.SidebarW else 0.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Sidebar(tab: Int, onTab: (Int) -> Unit, modifier: Modifier, activeFocus: FocusRequester, onFocusIn: (Boolean) -> Unit) {
+    if (com.ipvio.stream.mobile.MobileUi.active) return   // phones/tablets: bottom bar or rail (MobileFrame)
     var focusIn by remember { mutableStateOf(false) }   // = Seitenleiste hat den Fokus
     val pos = SidebarPrefs.pos
     // While the View live preview is open the app is only looked at: the bar does not open by itself (only "always with text" does)

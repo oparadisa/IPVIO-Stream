@@ -231,7 +231,8 @@ fun Field(
                 .clickable { editing = true }
         )
         BasicTextField(
-            value = value, onValueChange = onChange, singleLine = true, enabled = editing,
+            // Phones/tablets (fork): always editable, a tap focuses it and opens the keyboard (the disabled field swallowed taps)
+            value = value, onValueChange = onChange, singleLine = true, enabled = editing || com.ipvio.stream.mobile.MobileUi.active,
             textStyle = TextStyle(color = Color.White, fontSize = 20.sp),
             cursorBrush = SolidColor(Accent2),
             visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
