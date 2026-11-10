@@ -72,4 +72,17 @@ class MobileLogicTest {
         assertEquals(Back.SCROLL_TOP, MobileLogic.back(MenuLogic.HOME, scrolled = true))
         assertEquals(Back.EXIT, MobileLogic.back(MenuLogic.HOME, scrolled = false))
     }
+
+    @Test fun twoPaneFromExpandedWidth() {
+        assertEquals(false, MobileLogic.twoPane(411))     // phone
+        assertEquals(false, MobileLogic.twoPane(800))     // tablet in portrait
+        assertEquals(true, MobileLogic.twoPane(840))
+        assertEquals(true, MobileLogic.twoPane(1280))     // tablet in landscape
+    }
+
+    @Test fun listPaneWidth() {
+        assertEquals(280, MobileLogic.listPaneDp(840))
+        assertEquals(300, MobileLogic.listPaneDp(900))
+        assertEquals(400, MobileLogic.listPaneDp(1280))
+    }
 }

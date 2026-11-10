@@ -1,15 +1,19 @@
 package com.ipvio.stream.mobile
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -25,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -84,7 +89,7 @@ fun MobileBrowse(state: BrowseState, gridState: LazyGridState, onOpen: (Item) ->
  * number of titles; tap opens the grid. "Recently watched" and "My list" come first, as on the TV.
  */
 @Composable
-fun MobileCategories(req: CatReq, onPick: (String, List<Item>, Int) -> Unit, onBack: () -> Unit) = NativeDensity {
+fun MobileCategories(req: CatReq, onPick: (String, List<Item>, Int) -> Unit, onOpen: (Item) -> Unit, onBack: () -> Unit) = NativeDensity {
     val ctx = LocalContext.current
     BackHandler(onBack = onBack)
     var mode by remember { mutableIntStateOf(if (AppSettings.ipvioFilter && req.ipvio.isNotEmpty()) 0 else 1) }
@@ -99,7 +104,13 @@ fun MobileCategories(req: CatReq, onPick: (String, List<Item>, Int) -> Unit, onB
     }
     // Auto genres: best rated first; provider categories keep the area's sorting
     val catSort = if (mode == 0) 2 else req.sort
-    Column(Modifier.fillMaxSize()) {
+    fun sortOf(name: String) = if (isTopEntry(name)) 8 else catSort
+    // Wide tablets: list │ grid of the selected category
+    val wide = twoPane()
+    var selName by remember { mutableStateOf<String?>(null) }
+    val cur = entries.firstOrNull { it.first == selName } ?: entries.firstOrNull()
+    Row(Modifier.fillMaxSize()) {
+    Column(if (wide) Modifier.width(listPaneWidth()).fillMaxHeight() else Modifier.fillMaxSize()) {
         MTopBar(req.title, onBack = onBack)
         val chips = buildList { add(1); if (req.ipvio.isNotEmpty()) add(0); add(2) }
         MChipRow(chips, { when (it) { 0 -> "Auto-Genres"; 1 -> "Anbieter-Kategorien"; else -> "A–Z" } }, { if (it == 2) az else it == mode }) {
@@ -110,7 +121,8 @@ fun MobileCategories(req: CatReq, onPick: (String, List<Item>, Int) -> Unit, onB
             items(entries, key = { it.first }) { (name, items) ->
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp)
-                        .clickable { onPick(name, items, if (isTopEntry(name)) 8 else catSort) }
+                        .background(if (wide && name == cur?.first) Tok.CardFocus else Color.Transparent)
+                        .clickable { if (wide) selName = name else onPick(name, items, sortOf(name)) }
                         .padding(horizontal = PadX),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -120,6 +132,30 @@ fun MobileCategories(req: CatReq, onPick: (String, List<Item>, Int) -> Unit, onB
                     AppIcon(AIcon.Right, Tok.TextLow, size = 18.dp)
                 }
             }
+        }
+    }
+    if (wide && cur != null) CategoryGrid(cur.first, cur.second, sortOf(cur.first), onOpen) { onPick(cur.first, cur.second, sortOf(cur.first)) }
+    }
+}
+
+/** Right pane on wide tablets: the category's titles as a poster grid, sorted like "Show all"; the header opens the full screen. */
+@Composable
+private fun RowScope.CategoryGrid(name: String, items: List<Item>, sort: Int, onOpen: (Item) -> Unit, onAll: () -> Unit) {
+    val list by produceState<List<Item>?>(null, items, sort) {
+        value = null
+        value = withContext(Dispatchers.Default) { filterAndSort(items, BrowseKey(sort, 0, "Alle", null, null, 0)) }
+    }
+    Column(Modifier.weight(1f).fillMaxHeight()) {
+        MSection(name, raw = !isTopEntry(name), onAll = onAll)
+        val l = list
+        when {
+            l == null -> MLoading()
+            l.isEmpty() -> MEmpty(AIcon.Info, "Keine Treffer")
+            else -> LazyVerticalGrid(
+                GridCells.Adaptive(GridMin), Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = PadX, end = PadX, top = 8.dp, bottom = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) { items(l, key = { it.id }) { MPoster(it, Modifier.fillMaxWidth(), onOpen = onOpen) } }
         }
     }
 }

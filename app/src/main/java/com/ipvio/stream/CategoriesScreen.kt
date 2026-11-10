@@ -78,7 +78,7 @@ fun CategoriesScreen(
     onPick: (String, List<Item>, Int) -> Unit, onOpen: (Item) -> Unit,
     onBack: () -> Unit, onGoTab: (Int) -> Unit
 ) {
-    if (com.ipvio.stream.mobile.MobileUi.active) { com.ipvio.stream.mobile.MobileCategories(req, onPick, onBack); return }   // phones/tablets (fork)
+    if (com.ipvio.stream.mobile.MobileUi.active) { com.ipvio.stream.mobile.MobileCategories(req, onPick, onOpen, onBack); return }   // phones/tablets (fork)
     val ctx = LocalContext.current
     CatPrefs.init(ctx)
     var mode by remember { mutableIntStateOf(if (AppSettings.ipvioFilter && req.ipvio.isNotEmpty()) 0 else 1) }

@@ -42,9 +42,9 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 
-private class Cat(val icon: AIcon, val title: String, val sub: String)
+internal class Cat(val icon: AIcon, val title: String, val sub: String)   // fork: internal for the tablet settings (mobile/MobileSettings.kt)
 
-private val CATS = listOf(
+internal val CATS = listOf(
     Cat(AIcon.Gear, "Allgemein", "Start, Beenden, Autostart"),
     Cat(AIcon.Globe, "Sprache & Region", "Sprache, Uhrzeit, Zeitzone"),
     Cat(AIcon.Grid, "Ansicht", "Kartengröße, Seitenleiste, Raster"),
@@ -129,40 +129,47 @@ fun SettingsHub(onAdd: () -> Unit, reload: () -> Unit) {
                     .border(1.dp, Color(0x1AFFFFFF), RoundedCornerShape(dpx(18))).padding(dpx(26)),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-            when (page) {
-                0 -> GeneralPage(ctx)
-                1 -> RegionPage(ctx)
-                2 -> ViewPage(ctx)
-                3 -> DesignPage(ctx)
-                4 -> MenuPage(ctx)
-                5 -> PlayerPage(ctx)
-                6 -> AudioPage(ctx)
-                7 -> FilterPage(ctx) { page = 9 }
-                8 -> LivePage(ctx)
-                9 -> PlaylistPage(ctx, onAdd, reload)
-                10 -> ProfilesPage(ctx) { page = -1 }
-                11 -> ApiKeysPage(ctx)
-                12 -> ParentalPage(ctx) { page = -1 }
-                13 -> StoragePage(ctx)
-                14 -> DiagPage(ctx, reload)
-                16 -> BoomerPage(ctx) { page = -1 }
-                17 -> HomeLayoutPage(ctx)
-                15 -> ListImportPage(ctx)
-                19 -> DonateSection(ctx)
-                else -> AboutPage(ctx)   // 18
-            }
-            // Every setting page ends with a way back to the defaults
-            if (page in 0..8) {
-                SectionTitle("Zurücksetzen")
-                ConfirmPill("Alle Einstellungen zurücksetzen") {
-                    AppSettings.resetAll(ctx); General.resetAll(ctx)
-                    SidebarPrefs.set(ctx, SidebarPrefs.LEFT, false); BrowsePrefs.set(ctx, true); CatPrefs.set(ctx, true)
-                }
-                Hint("Setzt Ansicht, Menü, Player, Ton und Start auf die Standardwerte. Playlists, Favoriten und Verlauf bleiben erhalten. Das Design hat einen eigenen Knopf.")
-            }
+            SettingsPageContent(page, { page = it }, onAdd, reload)   // fork: shared with the tablet settings
             Spacer(Modifier.height(8.dp).bringIntoViewRequester(endReq))
             }
         }
+    }
+}
+
+/** The page [page] with its reset section; [setPage] switches to another page (-1 = back to the list). */
+@Composable
+internal fun SettingsPageContent(page: Int, setPage: (Int) -> Unit, onAdd: () -> Unit, reload: () -> Unit) {
+    val ctx = LocalContext.current
+    when (page) {
+        0 -> GeneralPage(ctx)
+        1 -> RegionPage(ctx)
+        2 -> ViewPage(ctx)
+        3 -> DesignPage(ctx)
+        4 -> MenuPage(ctx)
+        5 -> PlayerPage(ctx)
+        6 -> AudioPage(ctx)
+        7 -> FilterPage(ctx) { setPage(9) }
+        8 -> LivePage(ctx)
+        9 -> PlaylistPage(ctx, onAdd, reload)
+        10 -> ProfilesPage(ctx) { setPage(-1) }
+        11 -> ApiKeysPage(ctx)
+        12 -> ParentalPage(ctx) { setPage(-1) }
+        13 -> StoragePage(ctx)
+        14 -> DiagPage(ctx, reload)
+        16 -> BoomerPage(ctx) { setPage(-1) }
+        17 -> HomeLayoutPage(ctx)
+        15 -> ListImportPage(ctx)
+        19 -> DonateSection(ctx)
+        else -> AboutPage(ctx)   // 18
+    }
+    // Every setting page ends with a way back to the defaults
+    if (page in 0..8) {
+        SectionTitle("Zurücksetzen")
+        ConfirmPill("Alle Einstellungen zurücksetzen") {
+            AppSettings.resetAll(ctx); General.resetAll(ctx)
+            SidebarPrefs.set(ctx, SidebarPrefs.LEFT, false); BrowsePrefs.set(ctx, true); CatPrefs.set(ctx, true)
+        }
+        Hint("Setzt Ansicht, Menü, Player, Ton und Start auf die Standardwerte. Playlists, Favoriten und Verlauf bleiben erhalten. Das Design hat einen eigenen Knopf.")
     }
 }
 

@@ -131,7 +131,8 @@ fun MobileHome(
             when {
                 tab == MenuLogic.SETTINGS -> {
                     val reload: () -> Unit = { PlaylistStore.savedUrl(ctx)?.let { u -> scope.launch { PlaylistStore.load(ctx, u, false) } } }
-                    LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) { item { SettingsHub(onAdd, reload) } }
+                    if (twoPane()) MobileSettingsPanes(onAdd, reload)
+                    else LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) { item { SettingsHub(onAdd, reload) } }
                 }
                 PlaylistStore.loading && all.isEmpty() && PlaylistStore.heavy -> PlaylistLoadingOverlay()
                 PlaylistStore.loading && all.isEmpty() -> MLoading()
