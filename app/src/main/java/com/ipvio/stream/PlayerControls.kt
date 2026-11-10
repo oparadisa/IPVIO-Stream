@@ -1,5 +1,8 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.WithClose
+import com.ipvio.stream.mobile.panelTaps
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -322,9 +325,10 @@ fun BoxScope.PPanelFrame(
             }
             .focusGroup()
             .then(modifier)
+            .panelTaps()   // fork: phones/tablets close on a tap outside, not on the panel
             .padding(24.dp)
     ) {
-        Text(title, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+        WithClose(onEdgeDown) { Text(title, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1) }   // fork: X on phones/tablets
         Text(hint, color = Muted, fontSize = 14.sp, maxLines = 1, modifier = Modifier.padding(top = 2.dp, bottom = 16.dp))
         content()
     }

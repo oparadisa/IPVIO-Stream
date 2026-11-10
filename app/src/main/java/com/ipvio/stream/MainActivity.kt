@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
     /** Home key (or app switch) by the user – not on the screensaver and not on trailer/external player. */
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        AppNav.leftByUser = true
+        AppNav.leftByUser = !com.ipvio.stream.mobile.MobilePip.onUserLeaveHint(this)   // fork: PiP keeps the player open
     }
 
     /** Back in the app after the Home key: to the home screen (see AppContent). */

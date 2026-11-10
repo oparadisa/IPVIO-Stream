@@ -75,17 +75,20 @@ import com.ipvio.stream.fmtTime
  */
 @Composable
 fun MobilePlayerBar(
-    visible: Boolean, live: Boolean, title: String, subtitle: String?, playing: Boolean,
+    player: androidx.media3.common.Player, visible: Boolean, live: Boolean, title: String, subtitle: String?, playing: Boolean,
     pos: () -> Long, dur: () -> Long, buf: () -> Long, stepSec: Int,
     onInteract: () -> Unit, onBack: () -> Unit, onToggle: () -> Unit, onStep: (Int) -> Unit, onSeekTo: (Long) -> Unit,
     prev: (() -> Unit)?, next: (() -> Unit)?, onTracks: () -> Unit, onSettings: () -> Unit,
-    onEpisodes: (() -> Unit)?, onChannels: (() -> Unit)?, onGuide: (() -> Unit)?
+    onEpisodes: (() -> Unit)?, onChannels: (() -> Unit)?, onGuide: (() -> Unit)?, onPip: () -> Unit
 ) = NativeDensity {
     var portrait by rememberSaveable { mutableStateOf(false) }
+    var locked by rememberSaveable { mutableStateOf(false) }
     val isPhone = MobileLogic.isPhone(LocalConfiguration.current.smallestScreenWidthDp)
-    FullscreenPlayer(isPhone, PlayerTouchLogic.lockLandscape(isPhone, portrait))
+    FullscreenPlayer(PlayerTouchLogic.orientation(isPhone, portrait, locked))
+    MobilePip.Effect(player, playing, onPip)
+    if (!MobilePip.inPip) SwipeIndicator()
 
-    AnimatedVisibility(visible, Modifier.fillMaxSize(), enter = fadeIn(tween(160)), exit = fadeOut(tween(120))) {
+    AnimatedVisibility(visible && !MobilePip.inPip, Modifier.fillMaxSize(), enter = fadeIn(tween(160)), exit = fadeOut(tween(120))) {
         val safe = WindowInsets.safeDrawing.asPaddingValues()
         Box(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(120.dp).align(Alignment.TopCenter).background(Brush.verticalGradient(listOf(Color(0xB3000000), Color.Transparent))))
@@ -100,7 +103,8 @@ fun MobilePlayerBar(
                     }
                     PBtn(PIcon.AudioSubs, "Audio & Untertitel") { onInteract(); onTracks() }
                     PBtn(PIcon.Settings, "Einstellungen") { onInteract(); onSettings() }
-                    if (isPhone) MIconButton(AIcon.Phone, if (portrait) "Querformat" else "Hochformat", tint = Color.White) { onInteract(); portrait = !portrait }
+                    if (isPhone && !locked) MIconButton(AIcon.Phone, if (portrait) "Querformat" else "Hochformat", tint = Color.White) { onInteract(); portrait = !portrait }
+                    MIconButton(AIcon.Lock, if (locked) "Drehung entsperren" else "Drehung sperren", tint = if (locked) Accent1 else Color.White) { onInteract(); locked = !locked }
                 }
 
                 // Middle: previous, back/forward, play/pause, next
@@ -197,9 +201,9 @@ private fun StepBtn(icon: PIcon, sec: Int, desc: String, onClick: () -> Unit) {
     }
 }
 
-/** Full screen while the player is open: no frame padding, system bars hidden, phones locked to landscape. */
+/** Full screen while the player is open: no frame padding, system bars hidden, [orientation] requested. */
 @Composable
-private fun FullscreenPlayer(isPhone: Boolean, landscape: Boolean) {
+private fun FullscreenPlayer(orientation: Int) {
     val view = LocalView.current
     val act = LocalContext.current.activity()
     DisposableEffect(Unit) {
@@ -215,16 +219,10 @@ private fun FullscreenPlayer(isPhone: Boolean, landscape: Boolean) {
             act?.requestedOrientation = before
         }
     }
-    LaunchedEffect(landscape) {
-        act?.requestedOrientation = when {
-            !isPhone -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            landscape -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-        }
-    }
+    LaunchedEffect(orientation) { act?.requestedOrientation = orientation }
 }
 
-private tailrec fun Context.activity(): Activity? = when (this) {
+internal tailrec fun Context.activity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.activity()
     else -> null

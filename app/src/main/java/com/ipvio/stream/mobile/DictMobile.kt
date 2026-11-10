@@ -20,6 +20,10 @@ Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.¦Tap = next value. The
 Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.¦Applies to the skip buttons, double-tap and the timeline.¦Atlama düğmeleri, çift dokunma ve zaman çizelgesi için geçerlidir.¦Važi za tipke za skok, dvostruki dodir i vremensku traku.¦Vrijedi za tipke za skok, dvostruki dodir i vremensku crtu.¦Važi za dugmad za skok, dupli dodir i vremensku traku.¦Se aplica a los botones de salto, el doble toque y la línea de tiempo.¦S'applique aux boutons de saut, au double toucher et à la barre de temps.¦Vale per i pulsanti di salto, il doppio tocco e la barra temporale.
 Zurück mit der Zurück-Geste.¦Go back with the back gesture.¦Geri hareketiyle geri dön.¦Nazad pokretom za nazad.¦Natrag pokretom za natrag.¦Nazad pokretom za nazad.¦Vuelve con el gesto de atrás.¦Revenez avec le geste retour.¦Torna indietro con il gesto indietro.
 Tippen = ansehen¦Tap = watch¦Dokun = izle¦Dodir = gledaj¦Dodir = gledaj¦Dodir = gledaj¦Toca = ver¦Toucher = regarder¦Tocca = guarda
+Helligkeit¦Brightness¦Parlaklık¦Svjetlina¦Svjetlina¦Osvetljenje¦Brillo¦Luminosité¦Luminosità
+Lautstärke¦Volume¦Ses seviyesi¦Jačina zvuka¦Glasnoća¦Jačina zvuka¦Volumen¦Volume¦Volume
+Drehung sperren¦Lock rotation¦Döndürmeyi kilitle¦Zaključaj rotaciju¦Zaključaj rotaciju¦Zaključaj rotaciju¦Bloquear rotación¦Verrouiller la rotation¦Blocca rotazione
+Drehung entsperren¦Unlock rotation¦Döndürme kilidini aç¦Otključaj rotaciju¦Otključaj rotaciju¦Otključaj rotaciju¦Desbloquear rotación¦Déverrouiller la rotation¦Sblocca rotazione
 """
 
 val DictNlMobile = """
@@ -40,4 +44,8 @@ Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.¦Tikken = volgende waa
 Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.¦Geldt voor de spoelknoppen, dubbeltikken en de tijdlijn.
 Zurück mit der Zurück-Geste.¦Ga terug met het terug-gebaar.
 Tippen = ansehen¦Tikken = kijken
+Helligkeit¦Helderheid
+Lautstärke¦Volume
+Drehung sperren¦Draaien vergrendelen
+Drehung entsperren¦Draaien ontgrendelen
 """

@@ -1,5 +1,8 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.WithClose
+import com.ipvio.stream.mobile.panelTaps
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -185,7 +188,7 @@ fun ChannelOverlay(
     Row(Modifier.fillMaxSize()) {
         if (showCats) {
             Column(
-                Modifier.fillMaxHeight().width(300.dp).background(Color(0xF50C0D16)).padding(16.dp)
+                Modifier.fillMaxHeight().width(300.dp).background(Color(0xF50C0D16)).panelTaps().padding(16.dp)
                     .onPreviewKeyEvent { e ->
                         if (e.type != KeyEventType.KeyDown) false
                         else if (e.key == Key.DirectionRight) { onShowCats(false); true }
@@ -215,7 +218,7 @@ fun ChannelOverlay(
         }
         Column(
             Modifier.fillMaxHeight().width(430.dp).clip(panelShape)
-                .background(PT.PanelBg).padding(16.dp)
+                .background(PT.PanelBg).panelTaps().padding(16.dp)
                 .onPreviewKeyEvent { e ->
                     if (e.type != KeyEventType.KeyDown) false
                     else if (e.key == Key.DirectionRight && !showCats && !inHeader) { onClose(); true }
@@ -224,12 +227,12 @@ fun ChannelOverlay(
                 },
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconLabel(
+            WithClose(onClose) { IconLabel(   // fork: X on phones/tablets
                 when { chanCat == FAV_CAT -> AIcon.Star; curList != null -> AIcon.Lists; else -> null },
                 when { chanCat == FAV_CAT -> "Favoriten"; chanCat == "ALL" -> "Alle Sender"; curList != null -> curList.name; else -> chanCat },
                 Color.White, 24.sp, FontWeight.ExtraBold, iconSize = 22.dp, iconTint = if (chanCat == FAV_CAT) PT.Gold else Color.White,
                 raw = curList != null
-            )
+            ) }
             val headerItems = listOf("ALL", FAV_CAT) + myLists.map { ChannelListLogic.key(it) } + favCats
             LazyRow(Modifier.onFocusChanged { onInHeader(it.hasFocus) }, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 itemsIndexed(headerItems) { index, name ->
