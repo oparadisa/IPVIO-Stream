@@ -93,20 +93,21 @@ fun SettingsHub(onAdd: () -> Unit, reload: () -> Unit) {
     }
 
     // No verticalScroll of its own: the settings tab sits in a LazyColumn that scrolls itself.
-    Column(Modifier.padding(horizontal = DS.PageX, vertical = dpx(20)), verticalArrangement = Arrangement.spacedBy(dpx(18))) {
+    Column(Modifier.padding(horizontal = if (com.ipvio.stream.mobile.MobileUi.active) 16.dp else DS.PageX, vertical = dpx(20)), verticalArrangement = Arrangement.spacedBy(dpx(18))) {
         if (page < 0) {
             // Round 15: in the style of the home screen (tiles with an own color per area, calm font, white focus)
             Column(verticalArrangement = Arrangement.spacedBy(dpx(4))) {
                 Text("Einstellungen", color = Color.White, fontSize = spx(38), fontWeight = FontWeight.ExtraBold)
                 Text("Alles rund um Aussehen, Wiedergabe und Konto", color = Tok.TextLow, fontSize = spx(16))
             }
-            CATS.chunked(3).forEachIndexed { r, row ->
+            val perRow = if (com.ipvio.stream.mobile.MobileUi.active) 1 else 3   // phones/tablets (fork): one card per line
+            CATS.chunked(perRow).forEachIndexed { r, row ->
                 Row(horizontalArrangement = Arrangement.spacedBy(dpx(16))) {
                     row.forEachIndexed { c, cat ->
-                        val idx = r * 3 + c
+                        val idx = r * perRow + c
                         SettingsCard(cat, idx, Modifier.weight(1f).focusRequester(cardFocus[idx])) { last = idx; page = idx }
                     }
-                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                    repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         } else {
@@ -178,13 +179,14 @@ private fun SettingsCard(cat: Cat, idx: Int, modifier: Modifier, onClick: () -> 
     val shape = RoundedCornerShape(dpx(14))
     val (c1, c2, ink) = catColors(idx)
     Row(
-        modifier.height(dpx(96)).graphicsLayer { scaleX = s; scaleY = s }.clip(shape)
+        // Phones/tablets (fork): the card grows with the system font size instead of clipping its second line
+        modifier.then(if (com.ipvio.stream.mobile.MobileUi.active) Modifier.heightIn(min = dpx(96)) else Modifier.height(dpx(96))).graphicsLayer { scaleX = s; scaleY = s }.clip(shape)
             .background(Brush.horizontalGradient(listOf(c1, c2)))
             .border(if (f) 3.dp else 1.dp, if (f) Color.White else ink.copy(alpha = .22f), shape)
             .onFocusChanged { f = it.isFocused }
             .trackFocus()
             .clickable(onClick = onClick)
-            .padding(horizontal = dpx(20)),
+            .padding(horizontal = dpx(20), vertical = if (com.ipvio.stream.mobile.MobileUi.active) 10.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(dpx(16))
     ) {

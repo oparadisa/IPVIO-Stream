@@ -86,6 +86,7 @@ fun DetailScreen(
     embedded: Boolean = false, autoFocus: Boolean = true, onTopUp: (() -> Unit)? = null,
     showActions: Boolean = true
 ) {
+    if (com.ipvio.stream.mobile.MobileUi.active && !embedded) { com.ipvio.stream.mobile.MobileDetail(item, all, onPlay, onPerson, onOpenItem, onBack); return }   // phones/tablets (fork)
     val ctx = LocalContext.current
     var tryNo by remember(item.id) { mutableIntStateOf(0) }
     // Cinema preview without buttons (info only) does not need the episodes
