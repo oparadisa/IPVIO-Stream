@@ -61,6 +61,7 @@ object GuideSearchLogic {
 
 @Composable
 fun GuideSearchDialog(channels: List<Item>, onPick: (Item) -> Unit, onClose: () -> Unit) {
+    if (com.ipvio.stream.mobile.MobileUi.active) { com.ipvio.stream.mobile.MobileGuideSearch(channels, onPick, onClose); return }   // phones/tablets (fork)
     var q by remember { mutableStateOf("") }
     val fr = remember { FocusRequester() }
     val kbFirst = remember { FocusRequester() }

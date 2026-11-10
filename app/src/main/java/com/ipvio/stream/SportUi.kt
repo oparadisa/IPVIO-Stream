@@ -498,7 +498,7 @@ internal fun LazyListScope.standingsItems(grp: SportStandings.Group, mark: Strin
         Row(Modifier.fillMaxWidth().padding(top = dpx(10), start = dpx(12), end = dpx(12)), verticalAlignment = Alignment.CenterVertically) {
             Text(raw = true, text = "#", color = Muted, fontSize = spx(14), fontWeight = FontWeight.Bold, modifier = Modifier.width(dpx(40)))
             Text(raw = true, text = grp.name.ifBlank { Lang.tr("Team") }, color = Accent2, fontSize = spx(15), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), maxLines = 1)
-            grp.cols.forEach { c -> Text(c, color = Muted, fontSize = spx(14), fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.width(dpx(62))) }
+            grp.cols.forEach { c -> Text(c, color = Muted, fontSize = spx(14), fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.width(dpx(standCol()))) }
         }
     }
     items(grp.rows.size) { i ->
@@ -508,7 +508,7 @@ internal fun LazyListScope.standingsItems(grp: SportStandings.Group, mark: Strin
             Text(raw = true, text = r.rank, color = if (me) Accent2 else Muted, fontSize = spx(15), fontWeight = FontWeight.Bold, modifier = Modifier.width(dpx(28)))
             TeamName(r.team, 0, Modifier.weight(1f), logoSize = 26)
             if (SportFavs.has(r.team)) AppIcon(AIcon.Star, DS.Gold, size = dpx(16))
-            r.cells.forEach { c -> Text(raw = true, text = c, color = if (me) Accent2 else Tok.TextHi, fontSize = spx(15), fontWeight = if (me) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.End, modifier = Modifier.width(dpx(62))) }
+            r.cells.forEach { c -> Text(raw = true, text = c, color = if (me) Accent2 else Tok.TextHi, fontSize = spx(15), fontWeight = if (me) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.End, modifier = Modifier.width(dpx(standCol()))) }
         }
     }
 }
@@ -548,7 +548,7 @@ internal fun MatchHeader(g: SportData.Game, logo: Int = 96) {
             Text(raw = true, text = g.home.name, color = Tok.TextHi, fontSize = spx(20), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             g.home.record?.let { Text(raw = true, text = it, color = Muted, fontSize = spx(14)) }
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(dpx(6))) {
+        Column(if (com.ipvio.stream.mobile.MobileUi.active) Modifier.weight(1.4f) else Modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(dpx(6))) {   // fork: shares the width on phones
             MatchStatus(g, big = true)
             val long = (g.home.score?.length ?: 0) > 6 || (g.away.score?.length ?: 0) > 6
             if (long) {
@@ -556,7 +556,7 @@ internal fun MatchHeader(g: SportData.Game, logo: Int = 96) {
                 Text(raw = true, text = g.away.score ?: "", color = Tok.TextHi, fontSize = spx(20), fontWeight = FontWeight.ExtraBold)
             } else Text(raw = true, text = if (g.state == 0) hhmm(g.start) else scoreLine(g), color = Tok.TextHi, fontSize = spx(54), fontWeight = FontWeight.ExtraBold)
             val info = listOf(if (g.state == 0) dayLabel(g.start) else "", g.venue).filter { it.isNotBlank() }.joinToString(" · ")
-            if (info.isNotBlank()) Text(raw = true, text = info, color = Muted, fontSize = spx(15), maxLines = 1)
+            if (info.isNotBlank()) Text(raw = true, text = info, color = Muted, fontSize = spx(15), maxLines = 1, overflow = if (com.ipvio.stream.mobile.MobileUi.active) TextOverflow.Ellipsis else TextOverflow.Clip)
         }
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(dpx(8))) {
             TeamLogo(g.away.logo, g.away.abbr, dpx(logo))
@@ -572,3 +572,6 @@ internal fun featuredBrush(g: SportData.Game): Brush {
     val b = teamColor(g.away.color) ?: Accent2
     return Brush.horizontalGradient(listOf(a.copy(alpha = 0.30f), Tok.Card, b.copy(alpha = 0.30f)))
 }
+
+/** Width of a number column in the standings (design px); narrower on phones/tablets so the team name keeps its room (fork). */
+private fun standCol(): Int = if (com.ipvio.stream.mobile.MobileUi.active) 44 else 62

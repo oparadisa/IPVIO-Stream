@@ -52,7 +52,7 @@ internal fun ViewPage(ctx: Context, live: Boolean = false) {
         }
         return
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { tabChips() }
+    com.ipvio.stream.mobile.WrapRow(10.dp) { tabChips() }
     if (!live) Hint(
         when (tab) {
             0 -> "Karten: So sehen einzelne Filme und Serien in den Listen aus (Poster oder breites Bild, Größe, Infos)."
@@ -64,8 +64,10 @@ internal fun ViewPage(ctx: Context, live: Boolean = false) {
     )
     // Every choice applies immediately: one click shows it on the real home screen with your own titles
     // Every area except the sidebar can be tried live: the real screen opens with your own titles, every choice acts at once
-    PillButton("Live-Vorschau starten", light = true, icon = AIcon.Play) { ViewLive.active = true }
-    Hint("Zeigt die echte App mit deinen Titeln; die Einstellungen erscheinen in einer schmalen Leiste unten. Ein Klick auf eine Auswahl wirkt sofort.")
+    if (!com.ipvio.stream.mobile.MobileUi.active) {   // fork: the live preview shows the TV screens
+        PillButton("Live-Vorschau starten", light = true, icon = AIcon.Play) { ViewLive.active = true }
+        Hint("Zeigt die echte App mit deinen Titeln; die Einstellungen erscheinen in einer schmalen Leiste unten. Ein Klick auf eine Auswahl wirkt sofort.")
+    }
     when (tab) {
         0 -> CardsTab(ctx)
         1 -> SidebarTab(ctx)
@@ -80,6 +82,14 @@ internal fun ViewPage(ctx: Context, live: Boolean = false) {
 private fun TabLayout(preview: @Composable () -> Unit, controls: @Composable ColumnScope.() -> Unit) {
     // Live mode: the real app is the preview, so only the controls are shown
     if (ViewLive.active) { Column(verticalArrangement = Arrangement.spacedBy(10.dp), content = controls); return }
+    if (com.ipvio.stream.mobile.MobileUi.active && androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 840) {   // fork: preview on top
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            preview()
+            Text("Vorschau", color = Muted, fontSize = 13.sp)
+            controls()
+        }
+        return
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp), content = controls)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -99,8 +109,8 @@ private fun Chips(labels: List<String>, selected: Int, hov: MutableState<Int?>, 
             }) { onPick(i) }
         }
     }
-    if (labels.sumOf { it.length } > (if (ViewLive.active) 14 else 26)) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { items() }
-    else Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { items() }
+    if (!com.ipvio.stream.mobile.MobileUi.active && labels.sumOf { it.length } > (if (ViewLive.active) 14 else 26)) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { items() }
+    else com.ipvio.stream.mobile.WrapRow(10.dp) { items() }
 }
 
 // ───────── Building blocks of the mini preview ─────────

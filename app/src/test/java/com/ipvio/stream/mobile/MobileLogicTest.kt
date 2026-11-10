@@ -97,4 +97,9 @@ class MobileLogicTest {
         assertEquals(MobileLogic.GuideDims.TV, MobileLogic.guideDims(1280, 800))   // tablet
         assertEquals(MobileLogic.GuideDims.TV, MobileLogic.guideDims(800, 1280))   // tablet portrait
     }
+
+    @Test fun designWidthOnlyForPhoneSport() {
+        assertEquals(1658f, MobileLogic.designWidth(1658f, false))
+        assertEquals(MobileLogic.PHONE_DESIGN_W, MobileLogic.designWidth(1658f, true))
+    }
 }

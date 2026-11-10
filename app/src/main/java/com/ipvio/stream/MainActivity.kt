@@ -2,7 +2,6 @@ package com.ipvio.stream
 
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
-import com.ipvio.stream.mobile.LandscapeOnPhone
 import com.ipvio.stream.mobile.MobileFrame
 import com.ipvio.stream.mobile.MobileNav
 import com.ipvio.stream.mobile.MobileUi
@@ -391,12 +390,12 @@ private fun AppContent() {
         }
     }
 
-    // Phones/tablets: bottom bar / rail on the main areas; TV-layout screens that need the width turn a phone to landscape
+    // Phones/tablets: bottom bar / rail on the main areas (only the player turns a phone to landscape)
     SideEffect { MobileNav.publish(playing == null && top == null && !adding && !Boomer.enabled, tab) { id -> if (id != MenuLogic.EPG) { browse = null; cats = null }; goTab(id) } }
-    if (playing == null && (personTop != null || (Boomer.enabled && !adding) || (top == null && browse == null && cats == null && !adding && tab == MenuLogic.SPORT))) LandscapeOnPhone()
     BoxWithConstraints(Modifier.fillMaxSize().background(Bg).fitScreenInset(playing == null)) {
         // Scale of the design from the available width (see Design)
-        val dk = maxWidth.value / Design.WIDTH
+        // fork: a phone held upright lays Sport out for a narrower design (cards keep their landscape size, see MobileLogic.designWidth)
+        val dk = maxWidth.value / com.ipvio.stream.mobile.MobileLogic.designWidth(Design.WIDTH, com.ipvio.stream.mobile.MobileUi.active && LocalConfiguration.current.screenWidthDp < 600 && playing == null && top == null && tab == MenuLogic.SPORT)
         SideEffect { if (Design.k != dk) Design.k = dk }
         val p = playing
         val d = detail

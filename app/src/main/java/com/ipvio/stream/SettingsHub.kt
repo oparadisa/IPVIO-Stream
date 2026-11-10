@@ -1,5 +1,6 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.WrapRow
 import com.ipvio.stream.mobile.MobileUi
 import android.content.Context
 import androidx.activity.compose.BackHandler
@@ -447,7 +448,7 @@ private fun ParentalPage(ctx: Context, onExit: () -> Unit) {
             else Text(if (hiddenCount > 0) "$hiddenCount Einträge in deiner Playlist würden ausgeblendet." else "Kein Erwachsenen-Inhalt erkannt.", color = Muted, fontSize = 15.sp)
             SectionTitle("PIN")
             Text(if (Parental.pinSet) "PIN ist gesetzt" else "Keine PIN gesetzt", color = if (Parental.pinSet) Accent2 else Muted, fontSize = 16.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            WrapRow(12.dp) {
                 PillButton(if (Parental.pinSet) "PIN ändern" else "PIN festlegen", light = !Parental.pinSet) { err = null; step = 2 }
                 if (Parental.pinSet) ConfirmPill("PIN entfernen") { Parental.clearPin(ctx) }
             }
@@ -542,7 +543,7 @@ private fun StoragePage(ctx: Context) {
     Text("Gesamt: " + SettingsLogic.fmtBytes(sizes.sum()), color = Accent2, fontSize = 15.sp)
     Hint("Geleerte Daten lädt die App bei Bedarf neu. Titel-Infos und Bilder erscheinen danach kurz später. Der Playlist-Zwischenspeicher macht den Start schnell; ohne ihn wartet die App auf den Download.")
     SectionTitle("Verlauf")
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         ConfirmPill("Suchverlauf löschen") { AppSettings.clearSearch(ctx) }
         ConfirmPill("Zuletzt geschaut löschen") { General.clearHistory(ctx) }
         ConfirmPill("Weiterschauen löschen") { General.clearResume(ctx) }
@@ -550,7 +551,7 @@ private fun StoragePage(ctx: Context) {
     Hint("Meine Liste und Favoriten bleiben immer erhalten.")
     SectionTitle("Sicherung")
     var backupMsg by remember { mutableStateOf<String?>(null) }
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("Sicherung erstellen") {
             scope.launch {
                 val f = withContext(Dispatchers.IO) { Backup.export(ctx) }
@@ -599,7 +600,7 @@ private fun StoragePage(ctx: Context) {
             if (n >= 0) Profiles.restart(ctx) else backupMsg = "Keine gültige Sicherung gefunden."
         }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("Sicherung mit Playlists speichern …") {
             try { saveAsFull.launch("ipvio_backup_full.json") }
             catch (e: Exception) { backupMsg = "Auf diesem Gerät gibt es keine Dateiauswahl. Nutze die Übertragung im WLAN." }
@@ -733,10 +734,10 @@ private fun DesignPage(ctx: Context) {
     }
 
     // Space stays on the right for the preview
-    Column(Modifier.padding(end = DesignPreview.WIDTH + 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.padding(end = if (com.ipvio.stream.mobile.MobileUi.active) 0.dp else DesignPreview.WIDTH + 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
     SectionTitle("Fertige Designs")
     Look.DESIGNS.chunked(3).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WrapRow(10.dp) {
             row.forEach { d ->
                 val a = Look.ACCENTS[d.accent.coerceIn(0, Look.ACCENTS.lastIndex)]
                 val on = Look.accentIdx == d.accent && Look.bgIdx == d.bg
@@ -749,7 +750,7 @@ private fun DesignPage(ctx: Context) {
     SectionTitle("Farbthema")
     val ids = Look.ACCENTS.indices.toList() + Look.CUSTOM
     ids.chunked(2).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WrapRow(10.dp) {
             row.forEach { i ->
                 if (i == Look.CUSTOM) {
                     val c2 = if (Look.custom2 >= 0) Look.custom2 else Look.autoHighRgb()
@@ -769,14 +770,14 @@ private fun DesignPage(ctx: Context) {
         // Both colors freely selectable: first select the color above, then swatch or hex code
         var slot by remember { mutableIntStateOf(0) }
         val c2 = if (Look.custom2 >= 0) Look.custom2 else Look.autoHighRgb()
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WrapRow(10.dp) {
             ChoiceChip("Farbe 1 · Flächen", slot == 0, listOf(col(Look.custom))) { slot = 0 }
             ChoiceChip(if (Look.custom2 >= 0) "Farbe 2 · Hervorhebung" else "Farbe 2 · automatisch", slot == 1, listOf(col(c2))) { slot = 1 }
         }
         val current = if (slot == 0) Look.custom else c2
         fun pick(rgb: Int) { if (slot == 0) save(custom = rgb) else save(custom2 = rgb) }
         Look.SWATCHES.chunked(8).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            WrapRow(10.dp) {
                 row.forEach { c ->
                     Swatch(c, c == current, onFocus = { on ->
                         hover(on, ThemeMath.hexOf(c)) { if (slot == 0) DesignPreview.custom = c else DesignPreview.custom2 = c }
@@ -799,7 +800,7 @@ private fun DesignPage(ctx: Context) {
 
     SectionTitle("Hintergrund")
     Look.BGS.indices.chunked(2).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WrapRow(10.dp) {
             row.forEach { i ->
                 val b = Look.BGS[i]
                 ChoiceChip(b.name, Look.bgIdx == i, listOf(Color(0xFF000000.toInt() or b.surf2)),
@@ -810,14 +811,14 @@ private fun DesignPage(ctx: Context) {
 
     // Round 14: choice as fields (like the colors) – highlighting shows the effect in the preview, OK adopts it
     SectionTitle("Animationen")
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    WrapRow(10.dp) {
         Look.MOTION.forEachIndexed { i, n ->
             ChoiceChip(n, Look.motion == i, onFocus = { hover(it, Lang.tr(n)) { DesignPreview.motion = i } }) { save(motion = i) }
         }
     }
     SectionTitle("Anzeigegröße")
     Look.SCALES.indices.chunked(3).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WrapRow(10.dp) {
             row.forEach { i ->
                 val n = Look.SCALES[i]
                 ChoiceChip(n, Look.uiScale == i, onFocus = { hover(it, Lang.tr(n)) { DesignPreview.scale = i } }) { save(scale = i) }
@@ -838,7 +839,7 @@ private fun DesignPage(ctx: Context) {
     ToggleRow("Uhr anzeigen", null, General.showClock) { General.setShowClock(ctx, it) }
     SectionTitle("Schriftart")
     General.FONTS.indices.chunked(3).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WrapRow(10.dp) {
             row.forEach { i ->
                 val n = General.FONTS[i]
                 ChoiceChip(n, General.fontIdx == i, onFocus = { hover(it, Lang.tr(n)) { DesignPreview.font = i } }) { General.setFont(ctx, i) }
@@ -847,7 +848,7 @@ private fun DesignPage(ctx: Context) {
     }
     Hint("Outfit (Standard) und Inter sind in die App eingebaut, die übrigen Schriften stammen von deinem Gerät.")
     SectionTitle("Schriftgröße")
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    WrapRow(10.dp) {
         General.TEXT_SCALES.forEachIndexed { i, n ->
             ChoiceChip(n, General.textScaleIdx == i, onFocus = { hover(it, Lang.tr(n)) { DesignPreview.textScale = i } }) { General.setTextScale(ctx, i) }
         }
@@ -895,7 +896,7 @@ private fun DiagPage(ctx: Context, reload: () -> Unit) {
     // Hint before the buttons: text below the last button never scrolls the list into view (nothing below is selectable)
     Hint("Der Bericht enthält keine Adressen, Benutzernamen oder Passwörter. Er wird nur in die Zwischenablage kopiert und nirgendwohin gesendet.")
     Hint("Auf dem Fernseher lässt sich die Zwischenablage oft nicht nutzen: Unter Einstellungen > Speicher > „Übertragung im WLAN starten“ kannst du den Bericht am Handy öffnen (Seite „Letzten Absturzbericht anzeigen“) und dort kopieren.")
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("Playlist neu laden", light = true, icon = AIcon.Refresh) { reload() }
         PillButton("Bericht kopieren") {
             val text = lines.joinToString("\n") { it.first + ": " + it.second }
@@ -930,7 +931,7 @@ private fun AudioPage(ctx: Context) {
 @Composable
 private fun SubChoiceRow(title: String, names: List<String>, selected: Int, onProbe: (Int?) -> Unit, onPick: (Int) -> Unit) {
     Text(title, color = Muted, fontSize = 15.sp)
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    WrapRow(10.dp) {
         names.forEachIndexed { i, n ->
             ChoiceChip(n, selected == i, onFocus = { on -> if (on) onProbe(i) else onProbe(null) }) { onPick(i) }
         }
@@ -1064,7 +1065,7 @@ private fun LanguageFilterSection(ctx: Context) {
     } else if (PlaylistStore.error == PlaylistStore.MSG_TOO_BIG) Text(PlaylistStore.MSG_TOO_BIG, color = DS.Danger, fontSize = 15.sp)
     if (big) Text("Diese Auswahl ist sehr groß für dieses Gerät – das Laden kann lange dauern.", color = DS.Gold, fontSize = 15.sp)
     val mine = Lang.code()
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("Nur meine Sprache") { edit(list.map { it.first }.filter { it != mine && it != LangTagLogic.UNKNOWN }.toSet()) }
         PillButton("Alle an") { edit(emptySet()) }
         PillButton("Alle aus") { edit(list.map { it.first }.toSet()) }
@@ -1106,7 +1107,7 @@ private fun LivePage(ctx: Context) {
     ToggleRow("Sender-Qualitäten bündeln", "Derselbe Sender in 8K, 4K, FHD, HD und SD erscheint als eine Zeile. OK startet die beste Qualität, die anderen wählst du im Menü des Senders (OK gedrückt halten).", General.bundleLive) { General.setBundleLive(ctx, it) }
     Hint("Die App sucht die Programmdaten automatisch (Xtream-Schnittstelle oder XMLTV-Adresse aus der Playlist). Wenn dein Anbieter eine eigene XMLTV-Adresse nennt, trage sie hier ein.")
     Field(url, { url = it }, "https://…/xmltv.php?username=…&password=…")
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("Speichern & laden", light = true) {
             Xmltv.setCustom(ctx, url)
             Xmltv.start(ctx, PlaylistStore.epgUrls, PlaylistStore.channels)
@@ -1168,7 +1169,7 @@ private fun PlaylistPage(ctx: Context, onAdd: () -> Unit, reload: () -> Unit) {
         Field(name, { name = it }, "Name der Playlist")
         PillButton("Name speichern", light = true) { PlaylistStore.rename(ctx, editing, name); editing = -1 }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("+ Weitere Playlist hinzufügen", light = true) { onAdd() }
         PillButton("Aktive Playlist neu laden", icon = AIcon.Refresh) { reload() }
     }
@@ -1281,7 +1282,7 @@ private fun ApiKeysPage(ctx: Context) {
 
     Hint("Die Schlüssel bleiben nur auf diesem Gerät. Nach dem Eintragen die App einmal neu starten, damit alle Bereiche die Infos laden. Intro- und Abspann-Zeiten kommen von TheIntroDB und brauchen keinen Schlüssel.")
     // Buttons last: text below the last focusable element was cut off at the bottom of the page
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton(if (busy) "Bitte warten …" else "Speichern und prüfen", light = true, icon = AIcon.Check) {
             if (busy) return@PillButton
             busy = true
@@ -1305,7 +1306,7 @@ private fun AboutPage(ctx: Context) {
     Hint("IPVIO Stream ist ein Player und liefert selbst keine Inhalte. Nutze nur Quellen, für die du eine Berechtigung hast.")
     Hint("Dieses Produkt verwendet die TMDB-API, wird aber nicht von TMDB unterstützt oder zertifiziert. Wertungen: OMDb. Intro-Zeiten: TheIntroDB.")
     Hint("IPVIO Stream ist freie Software unter der GNU General Public License v3 (GPL-3.0). Verwendete Bibliotheken: AndroidX/Jetpack Compose, Media3 (Apache 2.0), OkHttp, Coil (Apache 2.0), Jellyfin FFmpeg-Decoder (GPL-3.0), Schriften Outfit und Inter (SIL Open Font License).")
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton("Systemeinstellungen der App") {
             runCatching {
                 ctx.startActivity(
@@ -1334,7 +1335,7 @@ private fun UpdateSection(ctx: Context) {
     ToggleRow("Automatisch nach Updates suchen", "Einmal am Tag. Ein neues Update erscheint in der Glocke oben rechts.", auto) { auto = it; AppUpdate.setAuto(ctx, it) }
     Hint("Die Schlüssel bleiben nur auf diesem Gerät. Nach dem Eintragen die App einmal neu starten, damit alle Bereiche die Infos laden. Intro- und Abspann-Zeiten kommen von TheIntroDB und brauchen keinen Schlüssel.")
     // Buttons last: text below the last focusable element was cut off at the bottom of the page
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    WrapRow(12.dp) {
         PillButton(if (busy) "Bitte warten …" else "Jetzt nach Update suchen") {
             if (busy) return@PillButton
             busy = true; status = "Suche …"

@@ -8,6 +8,8 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -34,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -263,4 +266,24 @@ internal fun MLoading(text: String? = null) {
         com.ipvio.stream.Spinner(Accent1, Modifier.size(40.dp))
         if (text != null) Text(text, color = Tok.TextLow, fontSize = 15.sp)
     }
+}
+
+/** Buttons or chips side by side: on phones/tablets they wrap onto the next line instead of being cut off; on the TV a plain row. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun WrapRow(gap: Dp, center: Boolean = false, content: @Composable () -> Unit) {
+    if (MobileUi.active) FlowRow(horizontalArrangement = Arrangement.spacedBy(gap), verticalArrangement = Arrangement.spacedBy(gap)) { content() }
+    else Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = if (center) Alignment.CenterVertically else Alignment.Top) { content() }
+}
+
+/** True on a phone/tablet window narrower than 600 dp (a phone held upright): TV screens stack what sits side by side. */
+@Composable
+fun narrowMobile(): Boolean = MobileUi.active && LocalConfiguration.current.screenWidthDp < 600
+
+/** Panels side by side (weights as in a row); on a phone held upright one under the other, each with the full width. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SideBySide(gap: Dp, modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
+    if (narrowMobile()) FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(gap), verticalArrangement = Arrangement.spacedBy(gap), maxItemsInEachRow = 1) { content() }
+    else Row(modifier, horizontalArrangement = Arrangement.spacedBy(gap), content = content)
 }

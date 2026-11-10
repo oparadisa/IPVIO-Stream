@@ -276,7 +276,7 @@ internal fun MatchCenterPage(g0: SportData.Game, hub: HubCtx) {
     HubPageFrame(g.groupName, listOf(g.note, if (l != null && l.name != g.groupName) l.name else "").filter { it.isNotBlank() }.joinToString(" · "), { hub.nav.pop() }, first) {
         HubPanel(Modifier.fillMaxWidth()) {
             MatchHeader(g, 84)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dpx(12))) {
+            com.ipvio.stream.mobile.WrapRow(dpx(12), center = true) {   // fork: phones/tablets wrap the buttons
                 WatchLiveButton(chans) { hub.watch(g) }
                 FilterPill(if (chans.isEmpty()) "Sender zuordnen" else Lang.tr("Sender") + " (" + chans.size + ")", false, Modifier.trackFocus(), aicon = AIcon.Live, raw = chans.isNotEmpty()) {
                     hub.nav.open(HubPage.Watch(g))

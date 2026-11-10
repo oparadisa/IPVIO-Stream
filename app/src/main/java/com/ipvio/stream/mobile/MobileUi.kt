@@ -1,8 +1,6 @@
 package com.ipvio.stream.mobile
 
-import android.content.pm.ActivityInfo
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,7 +35,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -257,19 +254,5 @@ private fun BoxScope.MoreSheet() {
                 Text(label(id), color = if (sel) Tok.TextHi else Ink, fontSize = 16.sp, fontWeight = if (sel) FontWeight.Bold else FontWeight.Medium)
             }
         }
-    }
-}
-
-/**
- * Screens still in their TV layout (sport, boomer mode, person page) are too wide for a phone held upright:
- * while such a screen is open, a phone turns to landscape. Tablets and TVs are not touched.
- */
-@Composable
-fun LandscapeOnPhone() {
-    if (!MobileUi.active || !MobileLogic.isPhone(LocalConfiguration.current.smallestScreenWidthDp)) return
-    val act = LocalActivity.current ?: return
-    DisposableEffect(act) {
-        act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        onDispose { act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
     }
 }

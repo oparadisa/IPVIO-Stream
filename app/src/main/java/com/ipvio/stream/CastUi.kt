@@ -124,6 +124,7 @@ fun PersonScreen(ref: PersonRef, all: List<Item>, onOpen: (Item) -> Unit, onBack
     val first = remember { FocusRequester() }
     LaunchedEffect(owned.isNotEmpty()) { if (owned.isNotEmpty()) { delay(150); runCatching { first.requestFocus() } } }
 
+    if (com.ipvio.stream.mobile.MobileUi.active) { com.ipvio.stream.mobile.MobilePerson(ref, info, loaded, owned, onOpen, onBack); return }   // phones/tablets (fork)
     Box(Modifier.fillMaxSize().background(Bg)) {
         LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = DS.PageX, vertical = 36.dp)) {
             item {
