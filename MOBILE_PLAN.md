@@ -1,4 +1,4 @@
-# Mobile plan: IPVIO Stream on phones and tablets (unofficial fork)
+# Mobile plan: Couchless (IPVIO Stream fork) on phones and tablets
 
 Status: **Approved** (2026-11-09) with the review notes in section 8. Phase 1 in progress.
 
@@ -153,4 +153,4 @@ Local build with Android Studio's JBR + SDK platform 37 (`local.properties`, git
 - Google Drive sync is a stub in this version (`DriveSync.kt` is empty), so no OAuth client is tied to the package.
 - `FileProvider` authority is `${applicationId}.fileprovider` and the code uses `packageName`, so both follow the new ID.
 - Kotlin package / `namespace` stay `com.ipvio.stream` (no source moves, which keeps upstream merges cheap).
-- `README.md` asks forks to use their own name and logo. The fork uses the label "IPVIO Mobile" and the upstream icon; see the note in the phase 1 PR.
+- `README.md` asks forks to use their own name and logo: the fork is named **Couchless** (`io.github.oparadisa.couchless`) with its own launcher icon and TV banner (vector drawables, sofa + play mark). The in-app header logo (`ic_brand_mark.png`, `Brand.kt`) and the "IPVIO Stream" wording inside the app are still upstream's (see open points).
