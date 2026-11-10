@@ -1,5 +1,8 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.CloseCorner
+import com.ipvio.stream.mobile.TapOutside
+
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.ConnectivityManager
@@ -792,8 +795,11 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
         val obs = LifecycleEventObserver { _, ev ->
             when (ev) {
                 Lifecycle.Event.ON_START -> foreground = true
-                Lifecycle.Event.ON_STOP -> foreground = false
-                Lifecycle.Event.ON_PAUSE -> {
+                Lifecycle.Event.ON_STOP -> {
+                    foreground = false
+                    if (com.ipvio.stream.mobile.MobileUi.active) { player.pause(); saveProgress() }   // fork: PiP window closed
+                }
+                Lifecycle.Event.ON_PAUSE -> if (com.ipvio.stream.mobile.MobilePip.keepsPlaying(ctx)) saveProgress() else {   // fork: PiP keeps playing
                     resumeAfter = player.playWhenReady
                     player.pause()
                     saveProgress()
@@ -1160,7 +1166,7 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
         // Phone/tablet (round 20): tap shows or hides the control bar, double-tap left/right seeks,
         // double-tap in the middle pauses. No effect on the TV (no touch).
         Box(
-            Modifier.fillMaxSize().pointerInput(cur.live) {
+            Modifier.fillMaxSize().then(com.ipvio.stream.mobile.swipeLevels()).pointerInput(cur.live) {   // fork: swipe = brightness/volume
                 detectTapGestures(
                     onTap = {
                         interact = System.currentTimeMillis()
@@ -1184,11 +1190,12 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
 
         // ---------------------------------------------------------------- Meldungen
         if (buffering && msg == null && !showGuide) {
-            Spinner(Accent2, Modifier.align(Alignment.Center).size(48.dp))
+            Spinner(Accent2, Modifier.align(Alignment.Center).then(com.ipvio.stream.mobile.belowCenterControls(controls)).size(48.dp))   // fork
         }
         msg?.takeIf { !Boomer.enabled }?.let { m ->
             Box(
-                Modifier.align(Alignment.Center).clip(RoundedCornerShape(DS.RadiusM)).background(PT.PanelBg)
+                Modifier.align(Alignment.Center).then(com.ipvio.stream.mobile.belowCenterControls(controls))   // phones/tablets: below the touch buttons (fork)
+                    .clip(RoundedCornerShape(DS.RadiusM)).background(PT.PanelBg)
                     .padding(horizontal = 28.dp, vertical = 18.dp)
             ) { Text(m, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold) }
         }
@@ -1299,7 +1306,7 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
         // ---------------------------------------------------------------- Steuerleiste
         AnimatedVisibility(
             // No control bar under the TV guide: otherwise focus could slip from the guide into this menu
-            visible = controls && !showGuide,
+            visible = controls && !showGuide && !com.ipvio.stream.mobile.MobileUi.active,   // phones/tablets: MobilePlayerBar (fork)
             modifier = Modifier.fillMaxSize(),
             enter = fadeIn(tween(160)),
             exit = fadeOut(tween(120))
@@ -1555,8 +1562,30 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
             }
         }
 
+        if (com.ipvio.stream.mobile.MobileUi.active) {   // phones/tablets: touch controls (fork)
+            val now = System.currentTimeMillis()
+            val arch = cur.archive != null
+            com.ipvio.stream.mobile.MobilePlayerBar(
+                player = player, visible = controls && !showGuide && panel == Panel.NONE && !showChannels, live = cur.live,
+                title = if (cur.season > 0 && cur.episode > 0) cur.title.substringBeforeLast(" S" + cur.season + "E" + cur.episode) else cur.title,
+                subtitle = if (cur.live) epg.firstOrNull { now in it.start until it.end }?.title
+                    else if (cur.season > 0 && cur.episode > 0) "S" + cur.season + " E" + cur.episode + (epName?.let { " · $it" } ?: "") else null,
+                playing = playing, pos = posNow, dur = durNow, buf = bufNow, stepSec = (step / 1000).toInt(),
+                onInteract = { interact = System.currentTimeMillis() }, onBack = { if (arch && curItem != null) backToLive() else onBack() }, onToggle = { togglePlay() },
+                onStep = { stepSeek(it, fromBar = false) }, onSeekTo = { player.seekTo(it); pos = it },
+                prev = if (cur.live) ({ zap(-1) }) else if (!arch && hasPrev) ({ playEpisode(epList[epIdx - 1]) }) else null,
+                next = if (cur.live) ({ zap(1) }) else if (!arch && hasNext) ({ playEpisode(epList[epIdx + 1]) }) else null,
+                onTracks = { openPanel(Panel.TRACKS) }, onSettings = { openPanel(Panel.MENU) },
+                onEpisodes = if (epList.size > 1) ({ openPanel(Panel.EPISODES) }) else null,
+                onChannels = if (cur.live) ({ openChannels() }) else null,
+                onGuide = if (cur.live) ({ showGuide = true }) else null,
+                onPip = { controls = false; showGuide = false; showChannels = false; if (panel != Panel.NONE) closePanel() }
+            )
+        }
+
         // ---------------------------------------------------------------- Senderliste & TV-Guide
         if (showChannels) {
+            TapOutside { showChannels = false }   // fork: tap outside closes (phones/tablets)
             ChannelOverlay(
                 liveAll, cur.itemId, curItem,
                 chanCat, { chanCat = it },
@@ -1577,10 +1606,12 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
                 zapSrc, cur.itemId, guideFocus, onClose = { showGuide = false }, onArchive = { ch, e -> playArchive(ch, e) },
                 all = liveAll.ifEmpty { zapSrc }, onPickIn = { ch, src -> switchTo(ch, src) }
             ) { switchTo(it, zapSrc) }
+            CloseCorner { showGuide = false }   // fork: X on phones/tablets
         }
 
         // ---------------------------------------------------------------- Menus
         if (panel != Panel.NONE) {
+            TapOutside { panelParent = Panel.NONE; panel = Panel.NONE }   // fork: tap outside closes (phones/tablets)
             val back = if (panelParent != Panel.NONE) "Links = zurück" else "Links schließt das Menü"
             when (panel) {
                 Panel.TRACKS -> TracksPanel(

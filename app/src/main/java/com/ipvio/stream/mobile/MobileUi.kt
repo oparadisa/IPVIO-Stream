@@ -105,6 +105,8 @@ object MobileNav {
     var shown by mutableStateOf(false)
     var tab by mutableIntStateOf(0)
     var more by mutableStateOf(false)
+    /** Full screen (the player): no padding for the system bars, the video goes edge to edge. */
+    var fullscreen by mutableStateOf(false)
     var onTab: (Int) -> Unit = {}
 
     fun publish(shown: Boolean, tab: Int, onTab: (Int) -> Unit) {
@@ -151,7 +153,7 @@ fun MobileFrame(native: Density, content: @Composable () -> Unit) {
     val showBar = nav && !rail && !imeOpen
     // Bar and rail are measured in native dp; the content is laid out with the (TV-scaled) app density
     fun native(d: Dp): Dp = with(density) { with(native) { d.toPx() }.toDp() }
-    val pad = PaddingValues(
+    val pad = if (MobileNav.fullscreen) PaddingValues(0.dp) else PaddingValues(
         start = safe.calculateStartPadding(dir) + if (nav && rail) native(RailW) else 0.dp,
         top = safe.calculateTopPadding(),
         end = safe.calculateEndPadding(dir),

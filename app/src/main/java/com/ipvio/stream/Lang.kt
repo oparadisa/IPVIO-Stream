@@ -49,7 +49,8 @@ object Lang {
         "es" -> "es-ES"; "fr" -> "fr-FR"; "it" -> "it-IT"; "nl" -> "nl-NL"; else -> "de-DE"
     }
 
-    fun tr(s: String): String {
+    fun tr(text: String): String {
+        val s = if (com.ipvio.stream.mobile.MobileUi.active) com.ipvio.stream.mobile.TouchHints.of(text) else text   // phones/tablets: touch wording (fork)
         val i = index
         return if (i == 0) s else I18nCore.translate(s, i)
     }
