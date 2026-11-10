@@ -158,6 +158,8 @@ object MetaRepo {
     private const val TTL = 30L * 24 * 3600 * 1000
     /** State of the match search. "Not found" from older states is retried with the better search. */
     private const val MATCH_V = 2
+    /** Version of the provider info; older saved entries are fetched again (2: running time from "duration" first). */
+    private const val PROV_V = 2
 
     fun enabled() = Config.TMDB_KEY.isNotBlank()
 
@@ -173,7 +175,7 @@ object MetaRepo {
         val k = "P|" + key(i)
         provMem[k]?.let { return withOmdbTitle(ctx, k, i, it) }
         provFail[k]?.let { if (System.currentTimeMillis() - it < 120_000L) return null }
-        load(ctx, k)?.let { provMem[k] = it; return withOmdbTitle(ctx, k, i, it) }
+        load(ctx, k, PROV_V)?.let { provMem[k] = it; return withOmdbTitle(ctx, k, i, it) }
         val m = ProviderInfo.fetch(ctx, i)
         if (m == null) { provFail[k] = System.currentTimeMillis(); return null }
         provMem[k] = m
@@ -250,18 +252,19 @@ object MetaRepo {
             j.put("imdbRating", m.imdbRating); j.put("rt", m.rtRating); j.put("ext", m.extended)
             j.put("gids", m.genreIds.joinToString(",")); j.put("lang", m.lang); j.put("votes", m.votes)
             j.put("countries", m.countries.joinToString(",")); j.put("ui", m.uiLang)
-            j.put("chk", m.checked); j.put("v", MATCH_V)
+            j.put("chk", m.checked); j.put("v", MATCH_V); j.put("pv", PROV_V)
             File(dir(c), k.hashCode().toString()).writeText(j.toString())
         } catch (e: Exception) {
         }
     }
 
-    private suspend fun load(c: Context, k: String): Meta? = withContext(Dispatchers.IO) {
+    private suspend fun load(c: Context, k: String, minProv: Int = 0): Meta? = withContext(Dispatchers.IO) {
         try {
             val f = File(dir(c), k.hashCode().toString())
             if (!f.exists()) return@withContext null
             val j = JSONObject(f.readText())
             if (System.currentTimeMillis() - j.optLong("ts") > TTL) return@withContext null
+            if (j.optInt("pv", 1) < minProv) return@withContext null
             // Not found earlier (often because of "DE - " before the title): try again with the improved search
             if (j.getInt("tmdbId") == -1 && j.optInt("v") < MATCH_V) return@withContext null
             Meta(

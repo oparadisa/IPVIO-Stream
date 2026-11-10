@@ -47,14 +47,17 @@ object ProviderLogic {
         return if (r5 != null && r5 > 0) (r5 * 2).coerceAtMost(10.0) else null
     }
 
-    /** Running time in minutes from seconds, "HH:MM:SS" or minutes. */
+    /**
+     * Running time in minutes from "HH:MM:SS", seconds or minutes. "duration" comes first: many panels put
+     * minutes into "duration_secs" (e.g. 122 next to "02:00:29"), which would read as 2 minutes.
+     */
     fun minutes(secs: String?, duration: String?, runMin: String?): Int? {
-        clean(secs)?.toDoubleOrNull()?.let { if (it > 0) return (it / 60).toInt().coerceAtLeast(1) }
         clean(duration)?.let { d ->
             val p = d.split(':').mapNotNull { it.trim().toIntOrNull() }
             if (p.size == 3) { val m = p[0] * 60 + p[1]; if (m > 0) return m }
             if (p.size == 2) { val m = p[0] * 60 + p[1]; if (m > 0) return m }
         }
+        clean(secs)?.toDoubleOrNull()?.let { if (it > 0) return (it / 60).toInt().coerceAtLeast(1) }
         clean(runMin)?.toIntOrNull()?.let { if (it > 0) return it }
         return null
     }
