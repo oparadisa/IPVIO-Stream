@@ -51,6 +51,10 @@ class ProviderLogicTest {
         assertEquals(105, ProviderLogic.minutes(null, "01:45:00", null))
         assertEquals(45, ProviderLogic.minutes("0", "", "45"))
         assertNull(ProviderLogic.minutes("", "", ""))
+        // Panels that put minutes into duration_secs: "duration" wins
+        assertEquals(120, ProviderLogic.minutes("122", "02:00:29", null))
+        assertEquals(98, ProviderLogic.minutes("98", "01:38:00", "98"))
+        assertEquals(122, ProviderLogic.minutes("7320", "00:00:00", null))
     }
 
     @Test fun genres_trailer_jahr() {
