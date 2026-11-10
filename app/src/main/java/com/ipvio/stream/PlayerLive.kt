@@ -6,6 +6,7 @@ import com.ipvio.stream.mobile.panelTaps
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -341,18 +342,21 @@ private fun ChannelRow(item: Item, current: Boolean, modifier: Modifier, onFocus
     // Menu key (if present): favorite and own channel lists. Holding OK = favorite immediately (user's wish).
     var menu by remember { mutableStateOf(false) }
     if (menu) Box { ChannelMenu(item, null, null) { menu = false } }
+    // With own channel lists: choice (favorites or a list); otherwise favorite on/off immediately
+    val fav: () -> Unit = {
+        if (ChannelLists.lists.isNotEmpty()) menu = true
+        else {
+            val on = !Library.isFav(item.id)
+            Library.toggleFav(ctx, item.id)
+            android.widget.Toast.makeText(ctx, Lang.tr(if (on) "Zu Favoriten hinzugefügt" else "Aus Favoriten entfernt"), android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
     Row(
         modifier.fillMaxWidth().padding(vertical = 3.dp).clip(shape)
             .background(if (f) Color.White else if (current) DS.Overlay2 else Color.Transparent)
             .onFocusChanged { f = it.isFocused; if (it.isFocused) onFocus() }
-            .menuKeys(onMenu = { menu = true }, onLong = {
-                // With own channel lists: choice (favorites or a list); otherwise favorite on/off immediately
-                if (ChannelLists.lists.isNotEmpty()) { menu = true; return@menuKeys }
-                val on = !Library.isFav(item.id)
-                Library.toggleFav(ctx, item.id)
-                android.widget.Toast.makeText(ctx, Lang.tr(if (on) "Zu Favoriten hinzugefügt" else "Aus Favoriten entfernt"), android.widget.Toast.LENGTH_SHORT).show()
-            })
-            .clickable(onClick = onClick)
+            .menuKeys(onMenu = { menu = true }, onLong = fav)
+            .then(if (com.ipvio.stream.mobile.MobileUi.active) Modifier.combinedClickable(onLongClick = fav, onClick = onClick) else Modifier.clickable(onClick = onClick))   // fork: hold = favorite on touch
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

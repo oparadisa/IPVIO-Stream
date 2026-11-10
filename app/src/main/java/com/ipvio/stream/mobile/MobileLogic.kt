@@ -55,6 +55,22 @@ object MobileLogic {
     /** Width of the list pane next to the content: a third of the window, 280 to 400 dp. */
     fun listPaneDp(widthDp: Int): Int = (widthDp / 3).coerceIn(280, 400)
 
+    /**
+     * Layout of the TV guide (dp): running picture [videoW]×[videoH] (full width on top when [videoTop], else top right),
+     * height of the top area next to it [headH], channel column [chW] (< 100 = logos only), category column [catW] (0 = categories as chips),
+     * [zoomScale] shrinks the chosen zoom so an hour fits on a phone.
+     */
+    data class GuideDims(val videoW: Int, val videoH: Int, val videoTop: Boolean, val headH: Int, val chW: Int, val catW: Int, val zoomScale: Float = 1f) {
+        companion object { val TV = GuideDims(400, 225, false, 238, 208, 206) }
+    }
+
+    /** Phone portrait: picture on top, narrow columns; phone landscape: small picture, short top area; tablets as on the TV. */
+    fun guideDims(widthDp: Int, heightDp: Int): GuideDims = when {
+        widthDp < 600 -> GuideDims(widthDp, widthDp * 9 / 16, true, 168, 72, 0, .6f)
+        heightDp < 500 -> GuideDims(224, 126, false, 140, 150, 150)
+        else -> GuideDims.TV
+    }
+
     enum class Back { GO_HOME, SCROLL_TOP, EXIT }
 
     /** System back on the main screen of a phone/tablet: other area → Home, Home scrolled → top, Home at the top → leave. */

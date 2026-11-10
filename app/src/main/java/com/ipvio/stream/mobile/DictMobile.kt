@@ -19,7 +19,9 @@ Zurück = vorheriges Menü¦Back = previous menu¦Geri = önceki menü¦Nazad = 
 Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.¦Tap = next value. The preview shows the result.¦Dokun = sonraki değer. Önizleme sonucu gösterir.¦Dodir = sljedeća vrijednost. Pregled prikazuje rezultat.¦Dodir = sljedeća vrijednost. Pregled prikazuje rezultat.¦Dodir = sledeća vrednost. Pregled prikazuje rezultat.¦Toca = siguiente valor. La vista previa muestra el resultado.¦Toucher = valeur suivante. L'aperçu montre le résultat.¦Tocca = valore successivo. L'anteprima mostra il risultato.
 Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.¦Applies to the skip buttons, double-tap and the timeline.¦Atlama düğmeleri, çift dokunma ve zaman çizelgesi için geçerlidir.¦Važi za tipke za skok, dvostruki dodir i vremensku traku.¦Vrijedi za tipke za skok, dvostruki dodir i vremensku crtu.¦Važi za dugmad za skok, dupli dodir i vremensku traku.¦Se aplica a los botones de salto, el doble toque y la línea de tiempo.¦S'applique aux boutons de saut, au double toucher et à la barre de temps.¦Vale per i pulsanti di salto, il doppio tocco e la barra temporale.
 Zurück mit der Zurück-Geste.¦Go back with the back gesture.¦Geri hareketiyle geri dön.¦Nazad pokretom za nazad.¦Natrag pokretom za natrag.¦Nazad pokretom za nazad.¦Vuelve con el gesto de atrás.¦Revenez avec le geste retour.¦Torna indietro con il gesto indietro.
-Tippen = ansehen¦Tap = watch¦Dokun = izle¦Dodir = gledaj¦Dodir = gledaj¦Dodir = gledaj¦Toca = ver¦Toucher = regarder¦Tocca = guarda
+Tippen = ansehen  ·  halten = Favorit¦Tap = watch  ·  hold = favorite¦Dokun = izle  ·  basılı tut = favori¦Dodir = gledaj  ·  zadrži = favorit¦Dodir = gledaj  ·  zadrži = favorit¦Dodir = gledaj  ·  zadrži = favorit¦Toca = ver  ·  mantén = favorito¦Toucher = regarder  ·  maintenir = favori¦Tocca = guarda  ·  tieni premuto = preferito
+Zur Seite ziehen = Uhrzeit  ·  Tippen = ansehen, Erinnerung oder Archiv¦Drag sideways = time  ·  Tap = watch, reminder or archive¦Yana sürükle = saat  ·  Dokun = izle, hatırlatıcı veya arşiv¦Povuci u stranu = vrijeme  ·  Dodir = gledaj, podsjetnik ili arhiva¦Povuci u stranu = vrijeme  ·  Dodir = gledaj, podsjetnik ili arhiva¦Povuci u stranu = vreme  ·  Dodir = gledaj, podsetnik ili arhiva¦Arrastra a un lado = hora  ·  Toca = ver, recordatorio o archivo¦Glisser de côté = heure  ·  Toucher = regarder, rappel ou archive¦Trascina di lato = ora  ·  Tocca = guarda, promemoria o archivio
+Tippe auf eine Sendung: ansehen, Erinnerung setzen oder aus dem Archiv.¦Tap a program: watch, set a reminder or play from the archive.¦Bir programa dokun: izle, hatırlatıcı kur veya arşivden izle.¦Dodirni emisiju: gledaj, postavi podsjetnik ili iz arhive.¦Dodirni emisiju: gledaj, postavi podsjetnik ili iz arhive.¦Dodirni emisiju: gledaj, postavi podsetnik ili iz arhive.¦Toca un programa: ver, poner un recordatorio o desde el archivo.¦Touche une émission : regarder, créer un rappel ou depuis l'archive.¦Tocca un programma: guarda, imposta un promemoria o dall'archivio.
 Helligkeit¦Brightness¦Parlaklık¦Svjetlina¦Svjetlina¦Osvetljenje¦Brillo¦Luminosité¦Luminosità
 Lautstärke¦Volume¦Ses seviyesi¦Jačina zvuka¦Glasnoća¦Jačina zvuka¦Volumen¦Volume¦Volume
 Drehung sperren¦Lock rotation¦Döndürmeyi kilitle¦Zaključaj rotaciju¦Zaključaj rotaciju¦Zaključaj rotaciju¦Bloquear rotación¦Verrouiller la rotation¦Blocca rotazione
@@ -43,7 +45,9 @@ Zurück = vorheriges Menü¦Terug = vorig menu
 Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.¦Tikken = volgende waarde. Het voorbeeld toont het resultaat.
 Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.¦Geldt voor de spoelknoppen, dubbeltikken en de tijdlijn.
 Zurück mit der Zurück-Geste.¦Ga terug met het terug-gebaar.
-Tippen = ansehen¦Tikken = kijken
+Tippen = ansehen  ·  halten = Favorit¦Tikken = kijken  ·  vasthouden = favoriet
+Zur Seite ziehen = Uhrzeit  ·  Tippen = ansehen, Erinnerung oder Archiv¦Sleep opzij = tijd  ·  Tikken = kijken, herinnering of archief
+Tippe auf eine Sendung: ansehen, Erinnerung setzen oder aus dem Archiv.¦Tik op een programma: kijken, herinnering zetten of uit het archief.
 Helligkeit¦Helderheid
 Lautstärke¦Volume
 Drehung sperren¦Draaien vergrendelen

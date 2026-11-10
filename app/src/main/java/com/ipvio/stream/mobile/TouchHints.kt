@@ -11,7 +11,7 @@ object TouchHints {
         "OK = nächster Wert. Die Vorschau zeigt das Ergebnis." to "Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.",
         "Gilt für Links/Rechts, Halten und die Zeitleiste." to "Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.",
         "Zurück mit der Zurück-Taste." to "Zurück mit der Zurück-Geste.",
-        "OK = ansehen  ·  halten = Favorit  ·  Links = Kategorien" to "Tippen = ansehen",
+        "OK = ansehen  ·  halten = Favorit  ·  Links = Kategorien" to "Tippen = ansehen  ·  halten = Favorit",
         "Links/Rechts = Spalte  ·  Zurück schließt" to CLOSE
     )
 

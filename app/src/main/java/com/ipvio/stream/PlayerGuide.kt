@@ -62,6 +62,7 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.lerp
 import coil.compose.AsyncImage
+import com.ipvio.stream.mobile.guideDrag
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -112,6 +113,7 @@ fun Guide(
 ) {
     val ctx = LocalContext.current
     GuidePrefs.init(ctx)
+    val gd = com.ipvio.stream.mobile.guideDims()   // fork: layout by window size (TV: unchanged)
     val openedAt = remember { System.currentTimeMillis() / 1000 }
     val base = (openedAt - 1800) - ((openedAt - 1800) % 1800)
     // Channels with archive (catchup): this many days can be scrolled back
@@ -125,7 +127,7 @@ fun Guide(
     val zoomNames = listOf("Klein", "Mittel", "Groß")
     val rowNames = listOf("Kompakt", "Normal", "Groß")
     val rowHeights = listOf(54, 66, 82)
-    val dpm = zooms[GuidePrefs.zoom]
+    val dpm = zooms[GuidePrefs.zoom] * gd.zoomScale
     val rowH = rowHeights[GuidePrefs.rowSize]
     val maxSpan = 2880L * 60
     var viewMin by remember { mutableIntStateOf(150) }
@@ -192,8 +194,9 @@ fun Guide(
     Column(
         Modifier.fillMaxSize()
             .drawBehind {
-                val l = size.width - 424.dp.toPx(); val t = 20.dp.toPx()
-                val hole = androidx.compose.ui.geometry.RoundRect(l, t, l + 400.dp.toPx(), t + 225.dp.toPx(), androidx.compose.ui.geometry.CornerRadius(DS.RadiusM.toPx()))
+                val l = size.width - (gd.videoW + 24).dp.toPx(); val t = 20.dp.toPx()
+                val hole = if (gd.videoTop) androidx.compose.ui.geometry.RoundRect(0f, 0f, size.width, gd.videoH.dp.toPx())
+                    else androidx.compose.ui.geometry.RoundRect(l, t, l + gd.videoW.dp.toPx(), t + gd.videoH.dp.toPx(), androidx.compose.ui.geometry.CornerRadius(DS.RadiusM.toPx()))
                 val path = androidx.compose.ui.graphics.Path().apply {
                     fillType = androidx.compose.ui.graphics.PathFillType.EvenOdd
                     addRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height))
@@ -201,18 +204,18 @@ fun Guide(
                 }
                 drawPath(path, Color(0xF7090B12))
             }
-            .padding(start = 24.dp, top = 14.dp, bottom = 10.dp, end = 24.dp)
+            .padding(start = if (gd.videoTop) 8.dp else 24.dp, top = if (gd.videoTop) (gd.videoH + 4).dp else 14.dp, bottom = 10.dp, end = if (gd.videoTop) 8.dp else 24.dp)
     ) {
-        Row(Modifier.fillMaxWidth().height(238.dp)) {
-            Column(Modifier.weight(1f).fillMaxHeight().padding(end = 20.dp)) {
+        Row(Modifier.fillMaxWidth().height(gd.headH.dp)) {
+            Column(Modifier.weight(1f).fillMaxHeight().padding(end = if (gd.videoTop) 0.dp else 20.dp)) {
                 // Header: title, date and time, Now and View
                 Row(Modifier.fillMaxWidth().height(58.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     MenuIcon(3, Accent1, Modifier.size(30.dp))
                     Column(Modifier.weight(1f)) {
                         Text("TV-Guide", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-                        Text("Live TV · Jetzt und in den nächsten Stunden", color = Muted, fontSize = 13.sp, maxLines = 1)
+                        if (!gd.videoTop) Text("Live TV · Jetzt und in den nächsten Stunden", color = Muted, fontSize = 13.sp, maxLines = 1)
                     }
-                    Row(
+                    if (!gd.videoTop) Row(
                         Modifier.clip(RoundedCornerShape(50)).background(Color(0x1FFFFFFF)).border(1.dp, Color(0x1FFFFFFF), RoundedCornerShape(50))
                             .padding(horizontal = 14.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -258,28 +261,39 @@ fun Guide(
                 }
                 GuideDetailPanel(infoE, infoItem, nowSec, Modifier.weight(1f).fillMaxWidth().padding(top = 4.dp))
             }
-            Spacer(Modifier.width(400.dp))
+            if (!gd.videoTop) Spacer(Modifier.width(gd.videoW.dp))
         }
+        if (gd.catW == 0) com.ipvio.stream.mobile.GuideCatChips(cats, catIdx) { catIdx = it }   // fork: phone portrait
         Row(Modifier.weight(1f).fillMaxWidth().padding(top = 8.dp)) {
             // Kategorien
-            LazyColumn(
-                Modifier.width(206.dp).fillMaxHeight().clip(RoundedCornerShape(DS.RadiusL)).background(Color(0x0FFFFFFF)),
+            if (gd.catW > 0) LazyColumn(
+                Modifier.width(gd.catW.dp).fillMaxHeight().clip(RoundedCornerShape(DS.RadiusL)).background(Color(0x0FFFFFFF)),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 itemsIndexed(cats) { ci, c ->
                     GuideCatRow(c, ci == catIdx, if (ci == catIdx) Modifier.focusRequester(catReq) else Modifier,
-                        onFocus = { inCats = true; inBlock = false; if (catIdx != ci) catIdx = ci }, onLeft = onClose) { runCatching { focus.requestFocus() } }
+                        onFocus = { inCats = true; inBlock = false; if (catIdx != ci) catIdx = ci }, onLeft = onClose) {
+                        if (com.ipvio.stream.mobile.MobileUi.active) catIdx = ci else runCatching { focus.requestFocus() }   // fork: a tap selects
+                    }
                 }
             }
-            Spacer(Modifier.width(12.dp))
-            BoxWithConstraints(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(DS.RadiusL)).background(Color(0x0AFFFFFF)).padding(horizontal = 8.dp, vertical = 6.dp)) {
-                val vm = ((maxWidth - 208.dp).value / dpm).toInt().coerceAtLeast(40)
+            if (gd.catW > 0) Spacer(Modifier.width(12.dp))
+            // fork: dragging sideways moves the time (phones/tablets)
+            val dragRest = remember { floatArrayOf(0f) }
+            BoxWithConstraints(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(DS.RadiusL)).background(Color(0x0AFFFFFF))
+                .guideDrag(dpm) { m ->
+                    dragRest[0] += m * 60f
+                    val s = dragRest[0].toLong(); dragRest[0] -= s
+                    winStart = (winStart + s).coerceIn(minStart, base + maxSpan - viewMin * 60L)
+                }
+                .padding(horizontal = if (gd.videoTop) 4.dp else 8.dp, vertical = 6.dp)) {
+                val vm = ((maxWidth - gd.chW.dp).value / dpm).toInt().coerceAtLeast(40)
                 SideEffect { if (viewMin != vm) viewMin = vm }
                 Column(Modifier.fillMaxSize()) {
                     Row(Modifier.height(34.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(raw = true, text = cats.getOrNull(catIdx)?.name?.let { Lang.tr(it) } ?: "", color = Muted, fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(208.dp).padding(start = 6.dp))
+                        Text(raw = true, text = cats.getOrNull(catIdx)?.name?.takeIf { gd.chW >= 100 }?.let { Lang.tr(it) } ?: "", color = Muted, fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(gd.chW.dp).padding(start = 6.dp))
                         Box(Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
                             // only the visible time marks (with archive the grid reaches days back)
                             var t = maxOf(minStart, winStart - winStart % 1800 - 3600)
@@ -306,7 +320,7 @@ fun Guide(
                         itemsIndexed(shown) { i, ch ->
                             val cellReq = if (i == idx) focus else remember { FocusRequester() }
                             GuideRow(
-                                ch, ch.id == curId, winStart, viewMin, dpm, nowSec, rowH.dp, GuidePrefs.hidePast, cellReq,
+                                ch, ch.id == curId, winStart, viewMin, dpm, nowSec, rowH.dp, GuidePrefs.hidePast, cellReq, gd.chW.dp,
                                 onInfo = { e -> infoE = e; infoItem = ch },
                                 onShift = { e -> shiftFor(e) },
                                 onBlock = { inB, r -> inBlock = inB; inCats = false; rowReq = r },
@@ -321,7 +335,8 @@ fun Guide(
             }
         }
         // Tastenhilfe
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (com.ipvio.stream.mobile.MobileUi.active) Box(Modifier.padding(top = 8.dp)) { com.ipvio.stream.mobile.GuideTouchHint() }   // fork
+        else Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
             GuideHint(null, "Sendungen", AIcon.Left, AIcon.Right)
             GuideHint(null, "Sender", AIcon.Up, AIcon.Down)
             // What OK does on the selected show (before a button in the detail field that was dropped for long texts)
@@ -411,6 +426,7 @@ private fun GuideDetailPanel(e: EpgEntry?, ch: Item?, nowSec: Long, modifier: Mo
         Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             if (e == null || ch == null) {
                 Text("TV-Guide", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                if (com.ipvio.stream.mobile.MobileUi.active) { Text("Tippe auf eine Sendung: ansehen, Erinnerung setzen oder aus dem Archiv.", color = PT.T2, fontSize = 14.sp); return@Column }   // fork
                 Text("Wähle eine Sendung mit den Pfeiltasten, OK schaltet auf den Sender.", color = PT.T2, fontSize = 14.sp)
                 Text("Zurück: zum Sender, dann zur Kategorie, dann schließen.", color = Muted, fontSize = 13.sp)
                 return@Column
@@ -466,7 +482,7 @@ private fun guideOkAction(e: EpgEntry?, ch: Item?, nowSec: Long): String {
 @Composable
 private fun GuideRow(
     ch: Item, current: Boolean, winStart: Long, viewMin: Int, dpm: Float, nowSec: Long, rowH: Dp, hidePast: Boolean,
-    cellReq: FocusRequester, onInfo: (EpgEntry?) -> Unit, onShift: (EpgEntry) -> Unit,
+    cellReq: FocusRequester, chW: Dp, onInfo: (EpgEntry?) -> Unit, onShift: (EpgEntry) -> Unit,
     onBlock: (Boolean, FocusRequester) -> Unit, onClose: () -> Unit, onArchive: (EpgEntry) -> Unit, onPick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -485,7 +501,7 @@ private fun GuideRow(
         var f by remember { mutableStateOf(false) }
         val shape = RoundedCornerShape(DS.RadiusS)
         Row(
-            Modifier.focusRequester(cellReq).width(208.dp).fillMaxHeight().padding(end = 8.dp).clip(shape)
+            Modifier.focusRequester(cellReq).width(chW).fillMaxHeight().padding(end = 8.dp).clip(shape)
                 .background(if (f) Accent1.copy(alpha = .30f) else if (current) DS.Overlay2 else Color(0x12FFFFFF))
                 .border(if (f) DS.Border else 1.dp, if (f) Accent1 else Color(0x0FFFFFFF), shape)
                 .onFocusChanged {
@@ -504,12 +520,12 @@ private fun GuideRow(
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Box(Modifier.size(38.dp).clip(RoundedCornerShape(DS.RadiusXs)).background(DS.Overlay2), contentAlignment = Alignment.Center) {
+            if (chW >= 100.dp || ch.logo != null) Box(Modifier.size(38.dp).clip(RoundedCornerShape(DS.RadiusXs)).background(DS.Overlay2), contentAlignment = Alignment.Center) {
                 if (ch.logo != null) AsyncImage(ch.logo, null, Modifier.fillMaxSize().padding(3.dp), contentScale = ContentScale.Fit)
             }
-            Text(
-                ch.title, color = Color.White, fontSize = 14.sp,
-                fontWeight = if (current || f) FontWeight.ExtraBold else FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis
+            if (chW >= 100.dp || ch.logo == null) Text(   // fork: phones show only the logo (the name when there is none)
+                ch.title, color = Color.White, fontSize = if (chW >= 100.dp) 14.sp else 11.sp,
+                fontWeight = if (current || f) FontWeight.ExtraBold else FontWeight.Medium, maxLines = if (chW >= 100.dp) 2 else 3, overflow = TextOverflow.Ellipsis
             )
         }
         Box(Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
@@ -577,6 +593,7 @@ private fun GuideRow(
                             // Later show: OK sets/deletes the reminder (round 14: without a selection window);
                             // in the archive: play the show; otherwise watch the channel
                             .clickable {
+                                if (com.ipvio.stream.mobile.MobileUi.active) onInfo(e)   // fork: a tap shows the show (touch moves no focus)
                                 val n = System.currentTimeMillis() / 1000
                                 if (ReminderLogic.canRemind(e.start, n)) {
                                     val on = Reminders.toggle(ctx, Reminder(ch.id, ch.title, e.title, e.start, e.end))

@@ -85,4 +85,16 @@ class MobileLogicTest {
         assertEquals(300, MobileLogic.listPaneDp(900))
         assertEquals(400, MobileLogic.listPaneDp(1280))
     }
+
+    @Test fun guideLayoutBySize() {
+        val portrait = MobileLogic.guideDims(412, 915)
+        assertEquals(true, portrait.videoTop)
+        assertEquals(412, portrait.videoW)
+        assertEquals(231, portrait.videoH)
+        assertEquals(0, portrait.catW)                                   // categories as chips
+        assertEquals(false, MobileLogic.guideDims(915, 412).videoTop)   // phone landscape: small picture top right
+        assertEquals(126, MobileLogic.guideDims(915, 412).videoH)
+        assertEquals(MobileLogic.GuideDims.TV, MobileLogic.guideDims(1280, 800))   // tablet
+        assertEquals(MobileLogic.GuideDims.TV, MobileLogic.guideDims(800, 1280))   // tablet portrait
+    }
 }

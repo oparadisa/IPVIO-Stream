@@ -18,10 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,11 +39,12 @@ import com.ipvio.stream.Tok
  * Each side scrolls on its own. The pages are the TV's ([SettingsPageContent]); phones keep [com.ipvio.stream.SettingsHub].
  */
 @Composable
-internal fun MobileSettingsPanes(onAdd: () -> Unit, reload: () -> Unit) {
-    var page by remember { mutableIntStateOf(0) }
+internal fun MobileSettingsPanes(shown: Int, setShown: (Int) -> Unit, onAdd: () -> Unit, reload: () -> Unit) {
+    // [shown] = -1: nothing chosen yet, the first area shows
+    val page = shown.coerceAtLeast(0)
     LaunchedEffect(SettingsNav.openPage) {
         val p = SettingsNav.openPage
-        if (p >= 0) { SettingsNav.openPage = -1; page = p }
+        if (p >= 0) { SettingsNav.openPage = -1; setShown(p) }
     }
     val pageState = rememberLazyListState()
     LaunchedEffect(page) { pageState.scrollToItem(0) }
@@ -59,7 +56,7 @@ internal fun MobileSettingsPanes(onAdd: () -> Unit, reload: () -> Unit) {
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
                         .background(if (sel) Tok.CardFocus else Color.Transparent)
-                        .clickable { page = i }.padding(horizontal = 12.dp, vertical = 8.dp),
+                        .clickable { setShown(i) }.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     AppIcon(cat.icon, if (sel) Accent1 else Tok.TextLow, size = 22.dp)
@@ -75,7 +72,7 @@ internal fun MobileSettingsPanes(onAdd: () -> Unit, reload: () -> Unit) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(CATS[page].title, color = Tok.TextHi, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(top = 16.dp))
                     // Pages that end with "back to the list" (profiles, parental control, Boomer mode) go back to the first area
-                    SettingsPageContent(page, { page = it.coerceAtLeast(0) }, onAdd, reload)
+                    SettingsPageContent(page, { setShown(it.coerceAtLeast(0)) }, onAdd, reload)
                 }
             }
         }

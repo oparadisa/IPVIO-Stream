@@ -1,5 +1,6 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.guideVideoMod
 import com.ipvio.stream.mobile.CloseCorner
 import com.ipvio.stream.mobile.TapOutside
 
@@ -1119,7 +1120,8 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
         // Aspect ratio (in the shrunken guide picture always "Fit"). Zoom: picture area larger than the screen, centered;
         // 4:3: area in 4:3 aspect ratio, centered.
         val am = if (showGuide) 0 else aspect
-        val videoMod = if (showGuide) Modifier.align(Alignment.TopEnd).padding(top = 20.dp, end = 24.dp).size(width = 400.dp, height = 225.dp).clip(RoundedCornerShape(DS.RadiusM))
+        val videoMod = if (showGuide && com.ipvio.stream.mobile.MobileUi.active) guideVideoMod() else if (showGuide)   // fork: guide picture on phones/tablets
+             Modifier.align(Alignment.TopEnd).padding(top = 20.dp, end = 24.dp).size(width = 400.dp, height = 225.dp).clip(RoundedCornerShape(DS.RadiusM))
         else when (am) {
             3, 4 -> {
                 val z = if (am == 3) 1.15f else 1.33f
@@ -1579,6 +1581,7 @@ fun PlayerScreen(req: PlayReq, zapList: List<Item>, liveAll: List<Item>, seriesI
                 onEpisodes = if (epList.size > 1) ({ openPanel(Panel.EPISODES) }) else null,
                 onChannels = if (cur.live) ({ openChannels() }) else null,
                 onGuide = if (cur.live) ({ showGuide = true }) else null,
+                onArchive = if (cur.live && Catchup.has(curItem)) ({ openPanel(Panel.ARCHIVE) }) else null,
                 onPip = { controls = false; showGuide = false; showChannels = false; if (panel != Panel.NONE) closePanel() }
             )
         }

@@ -49,7 +49,8 @@ class DictMobileTest {
         "Audio & Untertitel", "Einstellungen", "Hochformat", "Querformat", "Vorheriger Sender", "Nächster Sender",
         "Vorherige Folge", "Nächste Folge", "10 Sekunden zurück", "10 Sekunden vor", "Senderliste",
         "Zurück schließt das Menü", "Zurück = vorheriges Menü", "Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.",
-        "Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.", "Zurück mit der Zurück-Geste.", "Tippen = ansehen",
+        "Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.", "Zurück mit der Zurück-Geste.",
+        "Zur Seite ziehen = Uhrzeit  ·  Tippen = ansehen, Erinnerung oder Archiv", "Tippe auf eine Sendung: ansehen, Erinnerung setzen oder aus dem Archiv.", "Tippen = ansehen  ·  halten = Favorit",
         "Helligkeit", "Lautstärke", "Drehung sperren", "Drehung entsperren"
     )
 
