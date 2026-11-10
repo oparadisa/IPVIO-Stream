@@ -28,7 +28,9 @@ object MobilePrefs {
     fun apply(a: Activity) {
         landscape = a.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("landscape", true)
         if (!isMobile(a)) return
-        a.requestedOrientation = if (landscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        // Fork (Couchless): phones and tablets have their own layout and follow the device; the old landscape setting is ignored
+        com.ipvio.stream.mobile.MobileUi.active = true
+        a.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     fun set(a: Activity, v: Boolean) {

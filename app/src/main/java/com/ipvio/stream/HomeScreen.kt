@@ -1,5 +1,7 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.MobileLogic
+import com.ipvio.stream.mobile.MobileUi
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.RepeatMode
@@ -456,6 +458,14 @@ fun HomeScreen(
         val now = System.currentTimeMillis()
         if (now - lastBack < 2500) exitApp()
         else { lastBack = now; android.widget.Toast.makeText(ctx, Lang.tr("Noch einmal Zurück drücken zum Beenden"), android.widget.Toast.LENGTH_SHORT).show() }
+    }
+    // Phones/tablets (fork): no sidebar to fall back to; other area → Home, Home scrolled → top, Home at the top → leave
+    BackHandler(enabled = MobileUi.active && all.isNotEmpty()) {
+        when (MobileLogic.back(tab, (states.getOrNull(tab)?.firstVisibleItemIndex ?: 0) > 0)) {
+            MobileLogic.Back.GO_HOME -> onTab(0)
+            MobileLogic.Back.SCROLL_TOP -> scope.launch { runCatching { states[0].animateScrollToItem(0) } }
+            MobileLogic.Back.EXIT -> exitApp()
+        }
     }
 
     val resumeList by remember(byId) { derivedStateOf { WatchStore.entries.mapNotNull { e -> byId[e.itemId]?.let { e to it } } } }

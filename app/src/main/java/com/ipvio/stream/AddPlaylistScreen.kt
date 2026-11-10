@@ -1,5 +1,6 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.MobileUi
 import androidx.compose.ui.graphics.lerp
 import android.content.ClipboardManager
 import android.content.Context
@@ -91,7 +92,7 @@ fun AddPlaylistScreen(onDone: () -> Unit) {
         receiver.onList = { name, bytes ->
             Handler(Looper.getMainLooper()).post { ListImportApply.run(ctx, name, bytes) }
         }
-        serving = receiver.start()
+        if (!MobileUi.active) serving = receiver.start()   // phone import is for TVs (fork)
         onDispose { receiver.stop() }
     }
     val canCancel = PlaylistStore.lists.isNotEmpty() || PlaylistStore.channels.isNotEmpty()
@@ -234,7 +235,7 @@ fun AddPlaylistScreen(onDone: () -> Unit) {
             }
         }
         // Right: instructions for input on the phone
-        if (!compact) PhoneCard(Modifier.weight(1f), if (serving && ip != null) "http://" + ip + ":" + receiver.port else null, receiver.code)
+        if (!compact && !MobileUi.active) PhoneCard(Modifier.weight(1f), if (serving && ip != null) "http://" + ip + ":" + receiver.port else null, receiver.code)
     }
     }
 }

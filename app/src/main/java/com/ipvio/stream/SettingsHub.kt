@@ -1,5 +1,6 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.MobileUi
 import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
@@ -449,7 +450,7 @@ private fun ParentalPage(ctx: Context, onExit: () -> Unit) {
 private fun GeneralPage(ctx: Context) {
     var tick by remember { mutableIntStateOf(0) }
     SectionTitle("Start")
-    ToggleRow(
+    if (!MobileUi.active) ToggleRow(
         "Beim Einschalten des Geräts öffnen",
         "IPVIO Stream startet automatisch, sobald der Fernseher oder die Box hochgefahren ist.",
         General.autoStart
@@ -458,7 +459,7 @@ private fun GeneralPage(ctx: Context) {
         if (on && !canStartFromBoot(ctx)) openOverlaySettings(ctx)
     }
     val granted = remember(tick, General.autoStart) { canStartFromBoot(ctx) }
-    if (General.autoStart) {
+    if (General.autoStart && !MobileUi.active) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             IconLabel(
                 if (granted) AIcon.Check else AIcon.Warning,
@@ -477,16 +478,10 @@ private fun GeneralPage(ctx: Context) {
     ToggleRow("Letzten Sender beim Start abspielen", "Wenn du zuletzt Live TV gesehen hast, läuft dieser Sender direkt nach dem Start.", General.resumeLive) { General.setResumeLive(ctx, it) }
     ToggleRow("Letzten Film / letzte Serie beim Start fortsetzen", "Wenn du zuletzt einen Film oder eine Serie gesehen hast, läuft sie nach dem Start an der gemerkten Stelle weiter (bei einer fertigen Folge mit der nächsten).", General.resumeVod) { General.setResumeVod(ctx, it) }
 
-    SectionTitle("Bedienung")
-    ToggleRow("Tastatur des Geräts in der Suche", "Aus: die eingebaute Tastatur der App. An: die Tastatur deines Geräts (z. B. Gboard) mit allen Sprachen, Sprachfunktion und Einfügen. Mit OK auf das Suchfeld wird sie geöffnet.", AppSettings.systemKeyboard) { AppSettings.setSystemKeyboard(ctx, it) }
-    ToggleRow("Beenden bestätigen", "Auf der Startseite muss „Zurück“ zweimal gedrückt werden, damit die App nicht aus Versehen schließt.", General.confirmExit) { General.setConfirmExit(ctx, it) }
-    // Phone/tablet: landscape (the UI is built for the TV)
-    if (MobilePrefs.isMobile(ctx)) {
-        val act = generateSequence<Context>(ctx) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull()
-        ToggleRow("Auf dem Handy im Querformat", "Die App ist für den Fernseher gebaut und wirkt quer am besten. Aus: dreht mit dem Gerät. Im Player: Tippen zeigt die Steuerung, Doppeltippen links/rechts spult, in der Mitte Pause.", MobilePrefs.landscape) {
-            if (act != null) MobilePrefs.set(act, it)
-        }
-    }
+    // Phones/tablets (fork): system keyboard always, back leaves the app directly, orientation follows the device
+    if (!MobileUi.active) SectionTitle("Bedienung")
+    if (!MobileUi.active) ToggleRow("Tastatur des Geräts in der Suche", "Aus: die eingebaute Tastatur der App. An: die Tastatur deines Geräts (z. B. Gboard) mit allen Sprachen, Sprachfunktion und Einfügen. Mit OK auf das Suchfeld wird sie geöffnet.", AppSettings.systemKeyboard) { AppSettings.setSystemKeyboard(ctx, it) }
+    if (!MobileUi.active) ToggleRow("Beenden bestätigen", "Auf der Startseite muss „Zurück“ zweimal gedrückt werden, damit die App nicht aus Versehen schließt.", General.confirmExit) { General.setConfirmExit(ctx, it) }
 }
 
 internal fun canStartFromBoot(ctx: Context): Boolean =

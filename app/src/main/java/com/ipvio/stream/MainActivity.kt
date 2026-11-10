@@ -1,5 +1,11 @@
 package com.ipvio.stream
 
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
+import com.ipvio.stream.mobile.LandscapeOnPhone
+import com.ipvio.stream.mobile.MobileFrame
+import com.ipvio.stream.mobile.MobileNav
+import com.ipvio.stream.mobile.MobileUi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,6 +54,8 @@ class MainActivity : ComponentActivity() {
         LiveSettings.init(this)
         Recorder.attach(this)
         MobilePrefs.apply(this)
+        // Phones/tablets: draw behind the system bars (MobileFrame keeps the content clear), light bar icons on the dark app
+        if (MobileUi.active) enableEdgeToEdge(SystemBarStyle.dark(android.graphics.Color.TRANSPARENT), SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         // Fresh start (not just a rotated/recreated screen): "Resume last watched at start" may apply again.
         // The process often lives on after quitting; the marker flag therefore stayed set from the first start and nothing was opened any more.
         if (savedInstanceState == null) General.startupHandled = false
@@ -155,7 +163,7 @@ fun App(pick: Boolean = false) {
         if (!picked) ProfilePicker { id -> Profiles.select(c, id); AppSettings.init(c); Parental.init(c); LangFilter.init(c); Boomer.init(c); HomeLayout.init(c); BoomerLayout.init(c); picked = true }
         else {
             LaunchedEffect(Unit) { delay(10_000); runCatching { SportAlerts.run(c.applicationContext) } }   // after the start: the playlist and the home screen come first
-            Box(Modifier.fillMaxSize()) { AppContent(); SportAlertHost() }
+            Box(Modifier.fillMaxSize()) { MobileFrame(base) { AppContent() }; SportAlertHost() }
         }
         // New version available: dialog with one button (above every screen)
         UpdatePromptHost()
@@ -383,6 +391,9 @@ private fun AppContent() {
         }
     }
 
+    // Phones/tablets: bottom bar / rail on the main areas; TV-layout screens that need the width turn a phone to landscape
+    SideEffect { MobileNav.publish(playing == null && top == null && !adding && !Boomer.enabled, tab) { id -> if (id != MenuLogic.EPG) { browse = null; cats = null }; goTab(id) } }
+    if (playing == null && (personTop != null || (Boomer.enabled && !adding) || (top == null && browse == null && cats == null && !adding && tab == MenuLogic.SPORT))) LandscapeOnPhone()
     BoxWithConstraints(Modifier.fillMaxSize().background(Bg).fitScreenInset(playing == null)) {
         // Scale of the design from the available width (see Design)
         val dk = maxWidth.value / Design.WIDTH

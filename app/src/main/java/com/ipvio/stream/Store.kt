@@ -108,7 +108,7 @@ object AppSettings {
         ccPref = p.getBoolean("cc_pref", false)
         skipIntro = p.getBoolean("skip_intro", true)
         showInfo = p.getBoolean("show_info", true)
-        systemKeyboard = p.getBoolean("sys_kb", false)
+        systemKeyboard = p.getBoolean("sys_kb", MobilePrefs.isMobile(c))
         seekStep = p.getInt("seek_step", 10).coerceIn(5, 120)
         autoNext = p.getBoolean("auto_next", true)
         hideSec = p.getInt("hide_sec", 4).coerceIn(3, 15)
