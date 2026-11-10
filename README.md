@@ -1,6 +1,13 @@
-# IPVIO Stream
+# IPVIO Mobile
 
-DOWNLOADER CODE: 4200542
+> **Unofficial fork.** IPVIO Mobile is a community fork of [IPVIO Stream](https://github.com/Emrodev/IPVIO-Stream) by Emrodev, adapted for **phones and tablets**. It is not affiliated with or endorsed by the IPVIO Stream project. All credit for the original app goes to the upstream authors; please report problems with this fork [here](https://github.com/oparadisa/IPVIO-Stream/issues), not upstream.
+>
+> - App ID `io.github.oparadisa.ipviomobile` (debug builds: `.test` suffix), so it installs **next to** the official app and never replaces it.
+> - Your data does not move over by itself. To bring it over, in the official app use **Settings > Storage > "Save backup with playlists …"** (or "Save backup as …" without playlists), then **"Load backup from file …"** in IPVIO Mobile. Wi-Fi transfer works too. The plain "Create backup" button saves inside the official app's own folder, which IPVIO Mobile cannot read.
+> - In-app updates come from [this fork's releases](https://github.com/oparadisa/IPVIO-Stream/releases).
+> - TV behaviour is meant to stay the same as upstream; the phone and tablet work is described in [MOBILE_PLAN.md](MOBILE_PLAN.md).
+
+The original description follows.
 
 A free, open-source IPTV player for **Android TV, Google TV and Amazon Fire TV**, built with Kotlin and Jetpack Compose and designed for the remote control.
 
@@ -10,13 +17,9 @@ A free, open-source IPTV player for **Android TV, Google TV and Amazon Fire TV**
 
 ## Install
 
-**Download:** [IPVIO-Stream.apk (latest release)](https://github.com/Emrodev/IPVIO-Stream/releases/latest/download/IPVIO-Stream.apk)
+**Download (this fork):** [latest release](https://github.com/oparadisa/IPVIO-Stream/releases/latest). The official TV app is at [Emrodev/IPVIO-Stream](https://github.com/Emrodev/IPVIO-Stream/releases/latest).
 
-**Fire TV / Android TV with the Downloader app:** enter
-```
-https://github.com/Emrodev/IPVIO-Stream/releases/latest/download/IPVIO-Stream.apk
-```
-Allow "Install unknown apps" for Downloader (or your file manager) when asked, then install. No account or registration needed.
+Allow "Install unknown apps" for your browser or file manager when asked, then install. No account or registration needed.
 
 ## Features
 
