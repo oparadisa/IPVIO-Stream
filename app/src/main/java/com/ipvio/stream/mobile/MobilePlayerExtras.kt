@@ -166,22 +166,38 @@ object MobilePip {
     private fun supported(act: Activity) =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && act.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
 
-    private fun params(auto: Boolean): PictureInPictureParams? {
+    private var playingNow = false
+
+    /** Broadcast of the PiP window's play/pause button; only this app receives it. */
+    private fun toggleAction(ctx: Context) = ctx.packageName + ".PIP_TOGGLE"
+
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.O)
+    private fun playPause(ctx: Context): android.app.RemoteAction {
+        val label = Lang.tr(if (playingNow) "Pause" else "Abspielen")
+        val icon = if (playingNow) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+        val pi = android.app.PendingIntent.getBroadcast(
+            ctx, 0, android.content.Intent(toggleAction(ctx)).setPackage(ctx.packageName),
+            android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        return android.app.RemoteAction(android.graphics.drawable.Icon.createWithResource(ctx, icon), label, label, pi)
+    }
+
+    private fun params(act: Activity, auto: Boolean): PictureInPictureParams? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
-        val b = PictureInPictureParams.Builder().setAspectRatio(aspect)
+        val b = PictureInPictureParams.Builder().setAspectRatio(aspect).setActions(listOf(playPause(act)))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) b.setAutoEnterEnabled(auto).setSeamlessResizeEnabled(true)
         return b.build()
     }
 
     private fun update(act: Activity) {
         if (!supported(act)) return
-        params(armed)?.let { runCatching { act.setPictureInPictureParams(it) } }
+        params(act, armed)?.let { runCatching { act.setPictureInPictureParams(it) } }
     }
 
     /** Called from MainActivity.onUserLeaveHint; true = the player goes into PiP (so the app should not count it as "left"). */
     fun onUserLeaveHint(act: Activity): Boolean {
         if (!armed || !MobileUi.active || !supported(act)) return false
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) params(false)?.let { runCatching { act.enterPictureInPictureMode(it) } }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) params(act, false)?.let { runCatching { act.enterPictureInPictureMode(it) } }
         return true
     }
 
@@ -195,7 +211,7 @@ object MobilePip {
     @Composable
     internal fun Effect(player: Player, playing: Boolean, onEnter: () -> Unit) {
         val act = LocalContext.current.activity() as? ComponentActivity ?: return
-        LaunchedEffect(playing) { armed = playing; update(act) }
+        LaunchedEffect(playing) { armed = playing; playingNow = playing; update(act) }
         DisposableEffect(player, act) {
             fun size(v: VideoSize) {
                 val (w, h) = PlayerTouchLogic.pipAspect((v.width * v.pixelWidthHeightRatio).toInt(), v.height)
@@ -209,7 +225,13 @@ object MobilePip {
                 if (inPip) onEnter()
             }
             act.addOnPictureInPictureModeChangedListener(pipL)
+            // The window's play/pause button
+            val rx = object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: Context, i: android.content.Intent) { if (player.isPlaying) player.pause() else player.play() }
+            }
+            androidx.core.content.ContextCompat.registerReceiver(act, rx, android.content.IntentFilter(toggleAction(act)), androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED)
             onDispose {
+                runCatching { act.unregisterReceiver(rx) }
                 player.removeListener(l)
                 act.removeOnPictureInPictureModeChangedListener(pipL)
                 armed = false; inPip = false; update(act)

@@ -27,6 +27,10 @@ class PlayerTouchLogicTest {
         assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, PlayerTouchLogic.orientation(isPhone = true, portrait = false, locked = false))
         assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, PlayerTouchLogic.orientation(isPhone = true, portrait = true, locked = false))
         assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, PlayerTouchLogic.orientation(isPhone = false, portrait = true, locked = false))
+        // TV guide open: a phone follows how it is held; the rotation lock still wins
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_USER, PlayerTouchLogic.orientation(isPhone = true, portrait = false, locked = false, guide = true))
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_LOCKED, PlayerTouchLogic.orientation(isPhone = true, portrait = false, locked = true, guide = true))
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, PlayerTouchLogic.orientation(isPhone = false, portrait = false, locked = false, guide = true))
     }
 
     @Test fun swipeUpRaisesSwipeDownLowersAndStaysInRange() {

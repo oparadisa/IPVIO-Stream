@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -131,8 +132,13 @@ fun MobileHome(
             when {
                 tab == MenuLogic.SETTINGS -> {
                     val reload: () -> Unit = { PlaylistStore.savedUrl(ctx)?.let { u -> scope.launch { PlaylistStore.load(ctx, u, false) } } }
-                    if (twoPane()) MobileSettingsPanes(onAdd, reload)
-                    else LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) { item { SettingsHub(onAdd, reload) } }
+                    // The open page survives the switch between one and two panes (rotating, resizing)
+                    var page by remember { mutableIntStateOf(-1) }
+                    if (twoPane()) MobileSettingsPanes(page, { page = it }, onAdd, reload)
+                    else {
+                        LaunchedEffect(Unit) { if (page >= 0) SettingsNav.openPage = page }
+                        LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) { item { SettingsHub(onAdd, reload) { page = it } } }
+                    }
                 }
                 PlaylistStore.loading && all.isEmpty() && PlaylistStore.heavy -> PlaylistLoadingOverlay()
                 PlaylistStore.loading && all.isEmpty() -> MLoading()

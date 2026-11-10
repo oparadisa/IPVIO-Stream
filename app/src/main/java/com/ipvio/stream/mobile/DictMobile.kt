@@ -19,7 +19,9 @@ Zurück = vorheriges Menü¦Back = previous menu¦Geri = önceki menü¦Nazad = 
 Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.¦Tap = next value. The preview shows the result.¦Dokun = sonraki değer. Önizleme sonucu gösterir.¦Dodir = sljedeća vrijednost. Pregled prikazuje rezultat.¦Dodir = sljedeća vrijednost. Pregled prikazuje rezultat.¦Dodir = sledeća vrednost. Pregled prikazuje rezultat.¦Toca = siguiente valor. La vista previa muestra el resultado.¦Toucher = valeur suivante. L'aperçu montre le résultat.¦Tocca = valore successivo. L'anteprima mostra il risultato.
 Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.¦Applies to the skip buttons, double-tap and the timeline.¦Atlama düğmeleri, çift dokunma ve zaman çizelgesi için geçerlidir.¦Važi za tipke za skok, dvostruki dodir i vremensku traku.¦Vrijedi za tipke za skok, dvostruki dodir i vremensku crtu.¦Važi za dugmad za skok, dupli dodir i vremensku traku.¦Se aplica a los botones de salto, el doble toque y la línea de tiempo.¦S'applique aux boutons de saut, au double toucher et à la barre de temps.¦Vale per i pulsanti di salto, il doppio tocco e la barra temporale.
 Zurück mit der Zurück-Geste.¦Go back with the back gesture.¦Geri hareketiyle geri dön.¦Nazad pokretom za nazad.¦Natrag pokretom za natrag.¦Nazad pokretom za nazad.¦Vuelve con el gesto de atrás.¦Revenez avec le geste retour.¦Torna indietro con il gesto indietro.
-Tippen = ansehen¦Tap = watch¦Dokun = izle¦Dodir = gledaj¦Dodir = gledaj¦Dodir = gledaj¦Toca = ver¦Toucher = regarder¦Tocca = guarda
+Tippen = ansehen  ·  halten = Favorit¦Tap = watch  ·  hold = favorite¦Dokun = izle  ·  basılı tut = favori¦Dodir = gledaj  ·  zadrži = favorit¦Dodir = gledaj  ·  zadrži = favorit¦Dodir = gledaj  ·  zadrži = favorit¦Toca = ver  ·  mantén = favorito¦Toucher = regarder  ·  maintenir = favori¦Tocca = guarda  ·  tieni premuto = preferito
+Zur Seite ziehen = Uhrzeit  ·  Tippen = Details¦Drag sideways = time  ·  Tap = details¦Yana sürükle = saat  ·  Dokun = ayrıntılar¦Povuci u stranu = vrijeme  ·  Dodir = detalji¦Povuci u stranu = vrijeme  ·  Dodir = detalji¦Povuci u stranu = vreme  ·  Dodir = detalji¦Arrastra a un lado = hora  ·  Toca = detalles¦Glisser de côté = heure  ·  Toucher = détails¦Trascina di lato = ora  ·  Tocca = dettagli
+Tippe auf eine Sendung für Details: ansehen, erinnern oder von Anfang an.¦Tap a program for details: watch, remind or from the beginning.¦Ayrıntılar için bir programa dokun: izle, hatırlat veya baştan.¦Dodirni emisiju za detalje: gledaj, podsjeti ili od početka.¦Dodirni emisiju za detalje: gledaj, podsjeti ili od početka.¦Dodirni emisiju za detalje: gledaj, podseti ili od početka.¦Toca un programa para ver detalles: ver, recordar o desde el principio.¦Touche une émission pour les détails : regarder, rappel ou depuis le début.¦Tocca un programma per i dettagli: guarda, promemoria o dall'inizio.
 Helligkeit¦Brightness¦Parlaklık¦Svjetlina¦Svjetlina¦Osvetljenje¦Brillo¦Luminosité¦Luminosità
 Lautstärke¦Volume¦Ses seviyesi¦Jačina zvuka¦Glasnoća¦Jačina zvuka¦Volumen¦Volume¦Volume
 Drehung sperren¦Lock rotation¦Döndürmeyi kilitle¦Zaključaj rotaciju¦Zaključaj rotaciju¦Zaključaj rotaciju¦Bloquear rotación¦Verrouiller la rotation¦Blocca rotazione
@@ -43,7 +45,9 @@ Zurück = vorheriges Menü¦Terug = vorig menu
 Tippen = nächster Wert. Die Vorschau zeigt das Ergebnis.¦Tikken = volgende waarde. Het voorbeeld toont het resultaat.
 Gilt für die Sprungtasten, Doppeltippen und die Zeitleiste.¦Geldt voor de spoelknoppen, dubbeltikken en de tijdlijn.
 Zurück mit der Zurück-Geste.¦Ga terug met het terug-gebaar.
-Tippen = ansehen¦Tikken = kijken
+Tippen = ansehen  ·  halten = Favorit¦Tikken = kijken  ·  vasthouden = favoriet
+Zur Seite ziehen = Uhrzeit  ·  Tippen = Details¦Sleep opzij = tijd  ·  Tikken = details
+Tippe auf eine Sendung für Details: ansehen, erinnern oder von Anfang an.¦Tik op een programma voor details: kijken, herinneren of vanaf het begin.
 Helligkeit¦Helderheid
 Lautstärke¦Volume
 Drehung sperren¦Draaien vergrendelen

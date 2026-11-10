@@ -77,7 +77,7 @@ object SettingsNav {
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun SettingsHub(onAdd: () -> Unit, reload: () -> Unit) {
+fun SettingsHub(onAdd: () -> Unit, reload: () -> Unit, onPage: (Int) -> Unit = {}) {   // fork: onPage for phones/tablets
     val ctx = LocalContext.current
     var page by remember { mutableIntStateOf(-1) }
     var last by remember { mutableIntStateOf(0) }
@@ -88,6 +88,7 @@ fun SettingsHub(onAdd: () -> Unit, reload: () -> Unit) {
     val cardFocus = remember { List(CATS.size) { if (it == 0) ContentFocus.req else FocusRequester() } }
     val backFocus = remember { FocusRequester() }
     BackHandler(enabled = page >= 0) { page = -1 }
+    LaunchedEffect(page) { onPage(page) }   // fork: tablets keep the page when switching to two panes
     LaunchedEffect(page) {
         runCatching { if (page < 0) cardFocus[last].requestFocus() else backFocus.requestFocus() }
     }

@@ -1,6 +1,6 @@
 # Mobile plan: Couchless (IPVIO Stream fork) on phones and tablets
 
-Status: **Approved** (2026-11-09) with the review notes in section 8. Phases 1–4 merged; phase 5 in progress.
+Status: **Approved** (2026-11-09) with the review notes in section 8. Phases 1–5 merged; phase 6 in review.
 
 ## 1. What the codebase gives us today
 
@@ -116,6 +116,8 @@ Every phase ends with `./gradlew testDebugUnitTest assembleDebug` green on GitHu
    - PiP window: its own play/pause button (needs a media session).
    - Settings: keep the open page when the window switches between one and two panes.
 
+   Done in phase 6: the guide layout comes from `MobileLogic.guideDims`. On a phone in portrait the picture sits full width on top, categories are chips and the channel column shows logos. On a phone in landscape the picture is small. Tablets keep the TV sizes. Dragging sideways moves the time and taps select categories. Tapping a program never acts directly: it opens a details sheet with Watch, Set/Delete reminder (later shows) or From the beginning (archive). One touch hint line replaces the key legend. While the guide is open a phone follows how it is held, so it shows the portrait guide when upright. The PiP play/pause button is a RemoteAction with a package-local broadcast; no media session was needed.
+
 ## 6. Risks
 
 | # | Risk | Mitigation |
@@ -146,7 +148,7 @@ Every phase ends with `./gradlew testDebugUnitTest assembleDebug` green on GitHu
 Mobile screens use the device density **and** `fontScale` as the system gives them (the TV text factor `General.textFactor()` doesn't apply there). Layouts must survive 1.3× and 2× font scale (checked on the emulator with `adb shell settings put system font_scale`).
 
 ### 8.3 Portrait TV guide (candidate phase 6)
-Locking Sport, Boomer, the person page and the TV guide to landscape is fine for now. The TV guide is used a lot from Live TV, so a **portrait TV guide** is a candidate phase after the tablet work.
+Locking Sport, Boomer, the person page and the TV guide to landscape is fine for now. The TV guide is used a lot from Live TV, so a **portrait TV guide** is a candidate phase after the tablet work. (Done in phase 6: on a phone held upright the guide opens in portrait, from Live TV or from the player.)
 
 ### 8.4 Home rows extraction
 The move of row building out of `HomeScreen` is a **pure move with no behaviour change**, into a new `*Logic.kt` with unit tests, so upstream changes to `HomeScreen` stay easy to merge.

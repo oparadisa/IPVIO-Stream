@@ -79,12 +79,13 @@ fun MobilePlayerBar(
     pos: () -> Long, dur: () -> Long, buf: () -> Long, stepSec: Int,
     onInteract: () -> Unit, onBack: () -> Unit, onToggle: () -> Unit, onStep: (Int) -> Unit, onSeekTo: (Long) -> Unit,
     prev: (() -> Unit)?, next: (() -> Unit)?, onTracks: () -> Unit, onSettings: () -> Unit,
-    onEpisodes: (() -> Unit)?, onChannels: (() -> Unit)?, onGuide: (() -> Unit)?, onPip: () -> Unit
+    onEpisodes: (() -> Unit)?, onChannels: (() -> Unit)?, onGuide: (() -> Unit)?, onArchive: (() -> Unit)?, onPip: () -> Unit,
+    guide: Boolean = false
 ) = NativeDensity {
     var portrait by rememberSaveable { mutableStateOf(false) }
     var locked by rememberSaveable { mutableStateOf(false) }
     val isPhone = MobileLogic.isPhone(LocalConfiguration.current.smallestScreenWidthDp)
-    FullscreenPlayer(PlayerTouchLogic.orientation(isPhone, portrait, locked))
+    FullscreenPlayer(PlayerTouchLogic.orientation(isPhone, portrait, locked, guide))
     MobilePip.Effect(player, playing, onPip)
     if (!MobilePip.inPip) SwipeIndicator()
 
@@ -127,6 +128,7 @@ fun MobilePlayerBar(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                         onEpisodes?.let { e -> PBtn(PIcon.Episodes, "Folgen") { onInteract(); e() } }
                         onChannels?.let { c -> PBtn(PIcon.Channels, "Senderliste") { onInteract(); c() } }
+                        onArchive?.let { a -> MIconButton(AIcon.History, "Archiv: verpasste Sendungen", tint = Color.White) { onInteract(); a() } }
                         onGuide?.let { g -> PBtn(PIcon.Guide, "TV-Guide") { onInteract(); g() } }
                     }
                 }

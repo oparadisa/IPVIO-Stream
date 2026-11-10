@@ -1,5 +1,8 @@
 package com.ipvio.stream
 
+import com.ipvio.stream.mobile.WithClose
+import com.ipvio.stream.mobile.panelTaps
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,10 +98,11 @@ fun BoxScope.ArchivePanel(
     val shape = RoundedCornerShape(PT.PanelRadius)
     Column(
         Modifier.align(Alignment.TopEnd).padding(top = PT.MarginY, end = PT.MarginY).width(w).heightIn(max = maxH)
-            .clip(shape).background(PT.PanelBg).border(1.dp, PT.PanelBorder, shape).padding(22.dp)
+            .clip(shape).background(PT.PanelBg).border(1.dp, PT.PanelBorder, shape).panelTaps().padding(22.dp)   // fork: panelTaps
     ) {
         // Kopf: welcher Sender, welcher Tag
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        // fork: X on phones/tablets
+        WithClose(onClose) { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Box(Modifier.size(46.dp).clip(RoundedCornerShape(DS.RadiusS)).background(DS.Overlay2), contentAlignment = Alignment.Center) {
                 val lg = ch?.logo
                 if (lg != null) AsyncImage(lg, null, Modifier.fillMaxSize().padding(5.dp), contentScale = ContentScale.Fit)
@@ -113,7 +117,7 @@ fun BoxScope.ArchivePanel(
                 )
             }
             Text("Links/Rechts = Spalte  ·  Zurück schließt", color = Muted, fontSize = 13.sp, maxLines = 1)
-        }
+        } }
         Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             // 1) Channels with archive
             ArchiveColumn("Sender", Modifier.width(290.dp)) {
@@ -229,7 +233,7 @@ private fun ArchiveRow(
             .background(if (f) RowFocus else if (selected) Accent1.copy(alpha = .18f) else Color.Transparent)
             .border(if (f) DS.Border else 1.dp, if (f) Accent2 else if (selected) Accent1.copy(alpha = .5f) else Color.Transparent, shape)
             .onFocusChanged { f = it.isFocused; if (it.isFocused) onFocus() }
-            .clickable(onClick = onClick)
+            .clickable { if (com.ipvio.stream.mobile.MobileUi.active) onFocus(); onClick() }   // fork: a tap selects (touch moves no focus)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
