@@ -474,7 +474,8 @@ internal fun BoomerPage(ctx: Context, onExit: () -> Unit) {
             // No switch: once the mode runs, this page is no longer reachable (only via the hidden exit with PIN)
             var tick by remember { mutableIntStateOf(0) }
             val granted = remember(tick) { canStartFromBoot(ctx) }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // fork: the overlay permission only serves the start after power-on (TV/box); phones and tablets skip it
+            if (!com.ipvio.stream.mobile.MobileUi.active) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 IconLabel(
                     if (granted) AIcon.Check else AIcon.Warning,
                     if (granted) "Automatischer Start nach dem Einschalten: bereit" else "Automatischer Start: Berechtigung „Über anderen Apps einblenden“ fehlt",
@@ -483,7 +484,7 @@ internal fun BoomerPage(ctx: Context, onExit: () -> Unit) {
                 if (!granted) SmallPill("Einstellung öffnen") { openOverlaySettings(ctx) }
                 SmallPill("Prüfen", Modifier.focusRequester(firstReq)) { tick++; reportOverlayState(ctx) }
             }
-            Hint("Im Boomer Mode öffnet sich IPVIO Stream von selbst, sobald der Fernseher oder die Box eingeschaltet wird. Manche Geräte (z. B. einzelne Fire-TV-Modelle) blockieren das trotzdem.")
+            if (!com.ipvio.stream.mobile.MobileUi.active) Hint("Im Boomer Mode öffnet sich IPVIO Stream von selbst, sobald der Fernseher oder die Box eingeschaltet wird. Manche Geräte (z. B. einzelne Fire-TV-Modelle) blockieren das trotzdem.")
 
             SectionTitle("Was der Bildschirm zeigt")
             BlockLayoutPage(
@@ -529,7 +530,7 @@ internal fun BoomerPage(ctx: Context, onExit: () -> Unit) {
             SectionTitle("Starten")
             PillButton("Boomer Mode jetzt starten", light = true) {
                 Boomer.setEnabled(ctx, true)
-                if (!canStartFromBoot(ctx)) openOverlaySettings(ctx)
+                if (!com.ipvio.stream.mobile.MobileUi.active && !canStartFromBoot(ctx)) openOverlaySettings(ctx)
             }
             Hint("Die App wechselt sofort zur einfachen Oberfläche. Stelle vorher alles ein. Zurück zur normalen App: Zurück-Taste 10 Sekunden halten, dann PIN.")
         }
